@@ -1,5 +1,6 @@
 const CONFIG = {
   FORM_SHEET: 'form_responses',
+  MANUAL_SHEET: '_manual',
   DATA_SHEET: 'data',
   LOCATIONS_SHEET: '_locations',
 
@@ -16,7 +17,30 @@ const CONFIG = {
 
 /**
  * ============================================================
- * ENTRADA PRINCIPAL
+ * MENÚ
+ * ============================================================
+ */
+
+function onOpen() {
+
+  SpreadsheetApp.getUi()
+    .createMenu('Archipiélago Vivo')
+    .addItem(
+      'Procesar _manual',
+      'processManual'
+    )
+    .addSeparator()
+    .addItem(
+      'Procesar fila manual seleccionada',
+      'processSelectedManualRow'
+    )
+    .addToUi();
+}
+
+
+/**
+ * ============================================================
+ * FORMULARIO
  * ============================================================
  *
  * Activador:
@@ -35,26 +59,28 @@ const CONFIG = {
  * ACTUALIZACIÓN
  * -------------
  * Si entity_id ya existe:
- *   1. Busca ese ID en data.
- *   2. Actualiza esa misma fila.
+ *   1. Busca ese entity_id en data.
+ *   2. Actualiza ese registro.
  *
  * IMPORTANTE:
  * -------------
  * El consentimiento NO bloquea la entrada en data.
+ *
  * data es la base maestra.
  *
  * La exportación a uMap decidirá posteriormente
- * qué registros/campos puede publicar.
+ * qué registros y campos pueden publicarse.
  */
+
 function onFormSubmit(e) {
 
   try {
 
-    // ----------------------------------------------------------
-    // 1. Validar evento
-    // ----------------------------------------------------------
-
-    if (!e || !e.range || !e.namedValues) {
+    if (
+      !e ||
+      !e.range ||
+      !e.namedValues
+    ) {
 
       throw new Error(
         'El activador debe ser "Al enviar formulario" ' +
@@ -68,10 +94,6 @@ function onFormSubmit(e) {
       JSON.stringify(e.namedValues)
     );
 
-
-    // ----------------------------------------------------------
-    // 2. Obtener hoja y fila REAL
-    // ----------------------------------------------------------
 
     const formSheet =
       e.range.getSheet();
@@ -91,10 +113,6 @@ function onFormSubmit(e) {
     );
 
 
-    // ----------------------------------------------------------
-    // 3. Comprobar hoja correcta
-    // ----------------------------------------------------------
-
     if (
       formSheet.getName() !==
       CONFIG.FORM_SHEET
@@ -110,15 +128,15 @@ function onFormSubmit(e) {
     }
 
 
-    // ----------------------------------------------------------
-    // 4. Leer la fila REAL de la hoja
-    // ----------------------------------------------------------
-    //
-    // No dependemos exclusivamente de e.namedValues.
-    // Leemos directamente la fila que Google acaba de escribir.
-    //
+    /*
+     * Leemos directamente la fila real.
+     *
+     * Esto es importante porque en algunas actualizaciones
+     * e.namedValues no contiene correctamente todos los datos.
+     */
 
     SpreadsheetApp.flush();
+
 
     const response =
       readFormResponseRow(
@@ -133,19 +151,15 @@ function onFormSubmit(e) {
     );
 
 
-    // ----------------------------------------------------------
-    // 5. Hoja DATA
-    // ----------------------------------------------------------
-
     const dataSheet =
       getSheet(
         CONFIG.DATA_SHEET
       );
 
 
-    // ----------------------------------------------------------
-    // 6. Localización
-    // ----------------------------------------------------------
+    /*
+     * Localización
+     */
 
     console.log(
       'LOCATION: "' +
@@ -153,8 +167,10 @@ function onFormSubmit(e) {
       '"'
     );
 
+
     const locations =
       loadLocations();
+
 
     const location =
       resolveLocation(
@@ -169,14 +185,15 @@ function onFormSubmit(e) {
     );
 
 
-    // ----------------------------------------------------------
-    // 7. Consentimiento efectivo
-    // ----------------------------------------------------------
+    /*
+     * Consentimiento efectivo
+     */
 
     const effectiveConsent =
       getEffectivePublicationConsent(
         response
       );
+
 
     console.log(
       'CONSENTIMIENTO EFECTIVO: "' +
@@ -185,9 +202,9 @@ function onFormSubmit(e) {
     );
 
 
-    // ----------------------------------------------------------
-    // 8. NUEVA INSCRIPCIÓN
-    // ----------------------------------------------------------
+    /*
+     * NUEVO REGISTRO
+     */
 
     if (
       !response.entity_id
@@ -199,7 +216,10 @@ function onFormSubmit(e) {
         );
 
 
-      // Escribir ID en form_responses
+      /*
+       * Escribir entity_id en form_responses.
+       */
+
       writeEntityIdToFormResponse(
         formSheet,
         responseRow,
@@ -211,7 +231,10 @@ function onFormSubmit(e) {
         entityId;
 
 
-      // Crear DATA
+      /*
+       * Crear registro.
+       */
+
       createDataRecord(
         dataSheet,
         response,
@@ -228,9 +251,9 @@ function onFormSubmit(e) {
     }
 
 
-    // ----------------------------------------------------------
-    // 9. ACTUALIZACIÓN
-    // ----------------------------------------------------------
+    /*
+     * ACTUALIZACIÓN
+     */
 
     updateDataRecord(
       dataSheet,
@@ -266,6 +289,7 @@ function onFormSubmit(e) {
  * LEER FILA REAL DEL FORMULARIO
  * ============================================================
  */
+
 function readFormResponseRow(
   sheet,
   rowNumber
@@ -273,6 +297,7 @@ function readFormResponseRow(
 
   const headers =
     getHeaders(sheet);
+
 
   const values =
     sheet
@@ -315,6 +340,7 @@ function readFormResponseRow(
  * NORMALIZAR FORMULARIO
  * ============================================================
  */
+
 function normaliseFormResponse(
   values
 ) {
@@ -359,11 +385,6 @@ function normaliseFormResponse(
     email_address:
       get('Email address'),
 
-
-    // --------------------------------------------------------
-    // IDENTIDAD
-    // --------------------------------------------------------
-
     contributor_creator:
       get('contributor_creator'),
 
@@ -378,11 +399,6 @@ function normaliseFormResponse(
 
     entity_id:
       get('entity_id'),
-
-
-    // --------------------------------------------------------
-    // ACTIVIDAD
-    // --------------------------------------------------------
 
     format:
       get('format'),
@@ -414,11 +430,6 @@ function normaliseFormResponse(
     founded:
       get('founded'),
 
-
-    // --------------------------------------------------------
-    // CONTACTO
-    // --------------------------------------------------------
-
     url:
       get('url'),
 
@@ -430,11 +441,6 @@ function normaliseFormResponse(
 
     img:
       get('img'),
-
-
-    // --------------------------------------------------------
-    // REDES
-    // --------------------------------------------------------
 
     instagram:
       get('instagram'),
@@ -472,29 +478,14 @@ function normaliseFormResponse(
     youtube:
       get('youtube'),
 
-
-    // --------------------------------------------------------
-    // NECESIDADES / OFERTAS
-    // --------------------------------------------------------
-
     needs:
       get('needs'),
 
     offers:
       get('offers'),
 
-
-    // --------------------------------------------------------
-    // PRIVACIDAD
-    // --------------------------------------------------------
-
     private_fields:
       get('private_fields'),
-
-
-    // --------------------------------------------------------
-    // CONSENTIMIENTOS
-    // --------------------------------------------------------
 
     consent_accuracy:
       get('consent_accuracy'),
@@ -522,15 +513,14 @@ function normaliseFormResponse(
  * CONSENTIMIENTO EFECTIVO
  * ============================================================
  *
- * La lógica es:
- *
  * Sí + vacío  → Sí
  * No + Sí     → Sí
  * No + No     → No
  *
- * La segunda pregunta solo aparece si la primera
- * fue negativa.
+ * La segunda pregunta solo aparece si
+ * la primera fue negativa.
  */
+
 function getEffectivePublicationConsent(
   response
 ) {
@@ -538,13 +528,15 @@ function getEffectivePublicationConsent(
   const first =
     String(
       response.consent_publication || ''
-    ).trim();
+    )
+      .trim();
 
 
   const second =
     String(
       response.re_consent_publication || ''
-    ).trim();
+    )
+      .trim();
 
 
   if (
@@ -575,9 +567,6 @@ function getEffectivePublicationConsent(
 }
 
 
-/**
- * Comprueba respuesta afirmativa.
- */
 function isYes(value) {
 
   const normalized =
@@ -595,9 +584,6 @@ function isYes(value) {
 }
 
 
-/**
- * Comprueba respuesta negativa.
- */
 function isNo(value) {
 
   const normalized =
@@ -615,9 +601,10 @@ function isNo(value) {
 
 /**
  * ============================================================
- * CREAR REGISTRO
+ * CREAR REGISTRO EN DATA
  * ============================================================
  */
+
 function createDataRecord(
   dataSheet,
   response,
@@ -653,9 +640,15 @@ function createDataRecord(
 
 /**
  * ============================================================
- * ACTUALIZAR REGISTRO
+ * ACTUALIZAR REGISTRO EN DATA
  * ============================================================
+ *
+ * Usado por FORMULARIO.
+ *
+ * Como el formulario contiene todos los campos,
+ * los vacíos también se consideran valores reales.
  */
+
 function updateDataRecord(
   dataSheet,
   response,
@@ -665,7 +658,9 @@ function updateDataRecord(
   const entityId =
     String(
       response.entity_id
-    ).trim();
+    )
+      .trim()
+      .toUpperCase();
 
 
   if (!entityId) {
@@ -723,7 +718,9 @@ function updateDataRecord(
       .flat()
       .map(
         value =>
-          String(value).trim()
+          String(value)
+            .trim()
+            .toUpperCase()
       );
 
 
@@ -748,10 +745,6 @@ function updateDataRecord(
     position + 2;
 
 
-  // ----------------------------------------------------------
-  // Registro anterior
-  // ----------------------------------------------------------
-
   const oldRow =
     dataSheet
       .getRange(
@@ -770,10 +763,6 @@ function updateDataRecord(
     );
 
 
-  // ----------------------------------------------------------
-  // Fechas
-  // ----------------------------------------------------------
-
   const dateCreated =
     oldRecord.date_created ||
     new Date();
@@ -782,10 +771,6 @@ function updateDataRecord(
   const dateRevised =
     new Date();
 
-
-  // ----------------------------------------------------------
-  // Crear nuevo estado
-  // ----------------------------------------------------------
 
   const record =
     buildDataRecord(
@@ -796,10 +781,6 @@ function updateDataRecord(
       oldRecord
     );
 
-
-  // ----------------------------------------------------------
-  // Escribir respetando columnas de DATA
-  // ----------------------------------------------------------
 
   const newRow =
     headers.map(
@@ -850,6 +831,7 @@ function updateDataRecord(
  * CONSTRUIR REGISTRO DATA
  * ============================================================
  */
+
 function buildDataRecord(
   response,
   location,
@@ -862,16 +844,15 @@ function buildDataRecord(
     oldRecord || {};
 
 
-  // ----------------------------------------------------------
-  // NOMBRE
-  // ----------------------------------------------------------
-  //
-  // Si format está vacío:
-  // → persona.
-  //
-  // Esto permite que los registros individuales
-  // no necesiten format.
-  //
+  /*
+   * NOMBRE
+   *
+   * Formulario:
+   * - "En mi propio nombre" → name_individual
+   * - entidad → name_entity
+   *
+   * Si format está vacío, se considera persona.
+   */
 
   let name;
 
@@ -902,9 +883,9 @@ function buildDataRecord(
   }
 
 
-  // ----------------------------------------------------------
-  // CAMPOS PRIVADOS
-  // ----------------------------------------------------------
+  /*
+   * PRIVACIDAD
+   */
 
   const privateFields =
     parsePrivateFields(
@@ -912,33 +893,39 @@ function buildDataRecord(
     );
 
 
-  // ----------------------------------------------------------
-  // LICENCIA / ESTADO / VERIFICACIÓN
-  // ----------------------------------------------------------
+  /*
+   * Valores internos.
+   *
+   * Si proceden de DATA se conservan.
+   */
 
   const license =
+    response.license ||
     oldRecord.license ||
     CONFIG.DEFAULT_LICENSE;
 
 
   const verified =
+    response.verified ||
     oldRecord.verified ||
     CONFIG.DEFAULT_VERIFIED;
 
 
   const status =
+    response.status ||
     oldRecord.status ||
     CONFIG.DEFAULT_STATUS;
 
 
   return {
 
-    // --------------------------------------------------------
-    // IDENTIDAD
-    // --------------------------------------------------------
-
     entity_id:
-      response.entity_id,
+      String(
+        response.entity_id || ''
+      )
+        .trim()
+        .toUpperCase(),
+
 
     name:
       name,
@@ -949,10 +936,6 @@ function buildDataRecord(
         'Nombre'
       ),
 
-
-    // --------------------------------------------------------
-    // TIPO / CATEGORÍA
-    // --------------------------------------------------------
 
     format:
       response.format,
@@ -973,10 +956,6 @@ function buildDataRecord(
         'Categoría'
       ),
 
-
-    // --------------------------------------------------------
-    // CONTENIDO
-    // --------------------------------------------------------
 
     tags:
       response.tags,
@@ -1008,18 +987,9 @@ function buildDataRecord(
       ),
 
 
-    // --------------------------------------------------------
-    // UBICACIÓN
-    // --------------------------------------------------------
-    //
-    // DATA conserva siempre la localización real.
-    //
-    // location_private = TRUE
-    // significa que la exportación pública NO debe utilizar
-    // esa ubicación.
-    //
-    // En la exportación a uMap se sustituirá por Canarias.
-    //
+    /*
+     * LOCALIZACIÓN
+     */
 
     island:
       location.island,
@@ -1040,10 +1010,6 @@ function buildDataRecord(
       ),
 
 
-    // --------------------------------------------------------
-    // ACTIVIDAD
-    // --------------------------------------------------------
-
     activity:
       response.activity,
 
@@ -1053,10 +1019,6 @@ function buildDataRecord(
         'Actividades'
       ),
 
-
-    // --------------------------------------------------------
-    // PÚBLICO
-    // --------------------------------------------------------
 
     audience:
       response.audience,
@@ -1068,10 +1030,6 @@ function buildDataRecord(
       ),
 
 
-    // --------------------------------------------------------
-    // TERRITORIO
-    // --------------------------------------------------------
-
     territory:
       response.territory,
 
@@ -1082,10 +1040,6 @@ function buildDataRecord(
       ),
 
 
-    // --------------------------------------------------------
-    // AÑO DE INICIO
-    // --------------------------------------------------------
-
     founded:
       response.founded,
 
@@ -1095,10 +1049,6 @@ function buildDataRecord(
         'Año de inicio'
       ),
 
-
-    // --------------------------------------------------------
-    // NECESIDADES / OFERTAS
-    // --------------------------------------------------------
 
     needs:
       response.needs,
@@ -1120,17 +1070,9 @@ function buildDataRecord(
       ),
 
 
-    // --------------------------------------------------------
-    // LICENCIA
-    // --------------------------------------------------------
-
     license:
       license,
 
-
-    // --------------------------------------------------------
-    // IMAGEN
-    // --------------------------------------------------------
 
     img:
       response.img,
@@ -1142,10 +1084,6 @@ function buildDataRecord(
       ),
 
 
-    // --------------------------------------------------------
-    // WEB
-    // --------------------------------------------------------
-
     url:
       response.url,
 
@@ -1155,10 +1093,6 @@ function buildDataRecord(
         'Página web'
       ),
 
-
-    // --------------------------------------------------------
-    // EMAIL
-    // --------------------------------------------------------
 
     email:
       response.email_public,
@@ -1170,10 +1104,6 @@ function buildDataRecord(
       ),
 
 
-    // --------------------------------------------------------
-    // TELÉFONO
-    // --------------------------------------------------------
-
     phone:
       response.phone,
 
@@ -1183,10 +1113,6 @@ function buildDataRecord(
         'Teléfono'
       ),
 
-
-    // --------------------------------------------------------
-    // REDES
-    // --------------------------------------------------------
 
     instagram:
       response.instagram,
@@ -1308,23 +1234,25 @@ function buildDataRecord(
       ),
 
 
-    // --------------------------------------------------------
-    // ORIGEN
-    // --------------------------------------------------------
+    /*
+     * ORIGEN
+     */
 
     source:
+      response.source ||
       oldRecord.source ||
       'Formulario de inscripción',
 
 
     source_reference:
+      response.source_reference ||
       oldRecord.source_reference ||
       response.timestamp,
 
 
-    // --------------------------------------------------------
-    // ESTADO INTERNO
-    // --------------------------------------------------------
+    /*
+     * ESTADO
+     */
 
     verified:
       verified,
@@ -1333,43 +1261,41 @@ function buildDataRecord(
       status,
 
 
-    // --------------------------------------------------------
-    // CONTRIBUYENTE
-    // --------------------------------------------------------
+    /*
+     * CONTRIBUYENTE
+     */
 
     contributor_creator:
       response.contributor_creator,
 
-
     contributor_email:
-      response.email_address,
+      response.email_address ||
+      response.contributor_email ||
+      oldRecord.contributor_email ||
+      '',
 
 
-    // --------------------------------------------------------
-    // FECHAS
-    // --------------------------------------------------------
+    /*
+     * FECHAS
+     */
 
     date_created:
       dateCreated,
 
-
     contributor_revision:
-      response.contributor_creator,
-
+      response.contributor_creator ||
+      oldRecord.contributor_revision ||
+      '',
 
     date_revised:
       dateRevised,
 
 
-    // --------------------------------------------------------
-    // CONSENTIMIENTOS
-    // --------------------------------------------------------
-    //
-    // IMPORTANTE:
-    // Estos datos SÍ entran en DATA.
-    //
-    // No se utiliza aquí para bloquear el registro.
-    //
+    /*
+     * CONSENTIMIENTOS
+     *
+     * Siempre se guardan en DATA.
+     */
 
     consent_publication:
       getEffectivePublicationConsent(
@@ -1393,10 +1319,1376 @@ function buildDataRecord(
 
 /**
  * ============================================================
- * PRIVATE FIELDS
+ * PROCESAMIENTO DE _MANUAL
+ * ============================================================
+ *
+ * _manual tiene:
+ *
+ * manual_id
+ * processed
+ * processed_at
+ * processing_result
+ * entity_id
+ * ...
+ *
+ * Si entity_id está vacío:
+ * → crea.
+ *
+ * Si entity_id existe:
+ * → actualiza.
+ *
+ * Un campo vacío NO modifica DATA.
+ *
+ * clear_fields permite borrar explícitamente.
+ */
+
+function processManual() {
+
+  const sheet =
+    getSheet(
+      CONFIG.MANUAL_SHEET
+    );
+
+
+  const dataSheet =
+    getSheet(
+      CONFIG.DATA_SHEET
+    );
+
+
+  const lastRow =
+    sheet.getLastRow();
+
+
+  if (
+    lastRow < 2
+  ) {
+
+    SpreadsheetApp.getUi()
+      .alert(
+        'No hay registros en _manual.'
+      );
+
+    return;
+  }
+
+
+  let processedCount = 0;
+  let errorCount = 0;
+
+
+  for (
+    let rowNumber = 2;
+    rowNumber <= lastRow;
+    rowNumber++
+  ) {
+
+    try {
+
+      const result =
+        processManualRow(
+          sheet,
+          dataSheet,
+          rowNumber
+        );
+
+
+      if (result) {
+        processedCount++;
+      }
+
+
+    } catch (error) {
+
+      errorCount++;
+
+
+      console.error(
+        'ERROR EN _manual fila ' +
+        rowNumber +
+        ': ' +
+        error.message
+      );
+
+
+      markManualError(
+        sheet,
+        rowNumber,
+        error
+      );
+    }
+  }
+
+
+  SpreadsheetApp.getUi()
+    .alert(
+      'Procesamiento de _manual completado.\n\n' +
+      'Procesados: ' +
+      processedCount +
+      '\n' +
+      'Errores: ' +
+      errorCount
+    );
+}
+
+
+/**
+ * ============================================================
+ * PROCESAR FILA MANUAL SELECCIONADA
  * ============================================================
  */
-function parsePrivateFields(
+
+function processSelectedManualRow() {
+
+  const sheet =
+    getSheet(
+      CONFIG.MANUAL_SHEET
+    );
+
+
+  const dataSheet =
+    getSheet(
+      CONFIG.DATA_SHEET
+    );
+
+
+  const rowNumber =
+    sheet.getActiveCell()
+      .getRow();
+
+
+  if (
+    rowNumber < 2
+  ) {
+
+    SpreadsheetApp.getUi()
+      .alert(
+        'Selecciona una fila de datos de _manual.'
+      );
+
+    return;
+  }
+
+
+  try {
+
+    const processed =
+      processManualRow(
+        sheet,
+        dataSheet,
+        rowNumber
+      );
+
+
+    if (processed) {
+
+      SpreadsheetApp.getUi()
+        .alert(
+          'Fila _manual procesada correctamente.'
+        );
+
+    }
+
+  } catch (error) {
+
+    markManualError(
+      sheet,
+      rowNumber,
+      error
+    );
+
+
+    SpreadsheetApp.getUi()
+      .alert(
+        'Error:\n\n' +
+        error.message
+      );
+
+
+    throw error;
+  }
+}
+
+
+/**
+ * ============================================================
+ * PROCESAR UNA FILA DE _MANUAL
+ * ============================================================
+ */
+
+function processManualRow(
+  manualSheet,
+  dataSheet,
+  rowNumber
+) {
+
+  const headers =
+    getHeaders(
+      manualSheet
+    );
+
+
+  const values =
+    manualSheet
+      .getRange(
+        rowNumber,
+        1,
+        1,
+        headers.length
+      )
+      .getValues()[0];
+
+
+  const input =
+    rowToObject(
+      headers,
+      values
+    );
+
+
+  /*
+   * No reprocesar si ya está marcado como procesado.
+   */
+
+  if (
+    isProcessed(
+      input.processed
+    )
+  ) {
+
+    return false;
+  }
+
+
+  console.log(
+    'PROCESANDO _manual FILA: ' +
+    rowNumber
+  );
+
+
+  /*
+   * Normalizar entrada manual.
+   */
+
+  const manual =
+    normaliseManualResponse(
+      input
+    );
+
+
+  /*
+   * Resolver localización.
+   */
+
+  console.log(
+    'LOCATION MANUAL: "' +
+    manual.location +
+    '"'
+  );
+
+
+  const locations =
+    loadLocations();
+
+
+  const location =
+    resolveLocation(
+      manual.location,
+      locations
+    );
+
+
+  /*
+   * Obtener entity_id.
+   */
+
+  let entityId =
+    manual.entity_id;
+
+
+  /*
+   * NUEVO
+   */
+
+  if (!entityId) {
+
+    entityId =
+      generateUniqueEntityId(
+        dataSheet
+      );
+
+
+    manual.entity_id =
+      entityId;
+
+
+    createDataRecord(
+      dataSheet,
+      manual,
+      location
+    );
+
+
+    console.log(
+      'NUEVO REGISTRO MANUAL: ' +
+      entityId
+    );
+
+
+  /*
+   * ACTUALIZACIÓN
+   */
+
+  } else {
+
+    updateDataRecordFromManual(
+      dataSheet,
+      manual,
+      location
+    );
+
+
+    console.log(
+      'REGISTRO MANUAL ACTUALIZADO: ' +
+      entityId
+    );
+  }
+
+
+  /*
+   * Escribir entity_id en _manual
+   * si se acaba de generar.
+   */
+
+  writeManualEntityId(
+    manualSheet,
+    rowNumber,
+    entityId
+  );
+
+
+  /*
+   * Marcar procesado.
+   */
+
+  markManualProcessed(
+    manualSheet,
+    rowNumber,
+    entityId
+  );
+
+
+  return true;
+}
+
+
+/**
+ * ============================================================
+ * NORMALIZAR _MANUAL
+ * ============================================================
+ */
+
+function normaliseManualResponse(
+  values
+) {
+
+  const get = (
+    name
+  ) => {
+
+    const value =
+      values[name];
+
+
+    if (
+      value === undefined ||
+      value === null
+    ) {
+
+      return '';
+    }
+
+
+    if (
+      Array.isArray(value)
+    ) {
+
+      return value
+        .join(', ')
+        .trim();
+    }
+
+
+    return String(value)
+      .trim();
+  };
+
+
+  return {
+
+    manual_id:
+      get('manual_id'),
+
+    entity_id:
+      get('entity_id'),
+
+    name:
+      get('name'),
+
+    format:
+      get('format'),
+
+    category:
+      get('category'),
+
+    tags:
+      get('tags'),
+
+    mission:
+      get('mission'),
+
+    description:
+      get('description'),
+
+    location:
+      get('location'),
+
+    activity:
+      get('activity'),
+
+    audience:
+      get('audience'),
+
+    territory:
+      get('territory'),
+
+    founded:
+      get('founded'),
+
+    license:
+      get('license'),
+
+    img:
+      get('img'),
+
+    url:
+      get('url'),
+
+    email_public:
+      get('email'),
+
+    phone:
+      get('phone'),
+
+    instagram:
+      get('instagram'),
+
+    facebook:
+      get('facebook'),
+
+    bsky:
+      get('bsky'),
+
+    linkedin:
+      get('linkedin'),
+
+    mastodon:
+      get('mastodon'),
+
+    pixelfed:
+      get('pixelfed'),
+
+    telegram:
+      get('telegram'),
+
+    threads:
+      get('threads'),
+
+    tiktok:
+      get('tiktok'),
+
+    whatsapp:
+      get('whatsapp'),
+
+    x:
+      get('x'),
+
+    youtube:
+      get('youtube'),
+
+    needs:
+      get('needs'),
+
+    offers:
+      get('offers'),
+
+    private_fields:
+      get('private_fields'),
+
+    source:
+      get('source'),
+
+    source_reference:
+      get('source_reference'),
+
+    verified:
+      get('verified'),
+
+    status:
+      get('status'),
+
+    contributor_creator:
+      get('contributor_creator'),
+
+    contributor_email:
+      get('contributor_email'),
+
+    date_created:
+      get('date_created'),
+
+    contributor_revision:
+      get('contributor_revision'),
+
+    date_revised:
+      get('date_revised'),
+
+    consent_publication:
+      get('consent_publication'),
+
+    consent_accuracy:
+      get('consent_accuracy'),
+
+    consent_contact:
+      get('consent_contact'),
+
+    consent_whatsapp:
+      get('consent_whatsapp'),
+
+    consent_newsletter:
+      get('consent_newsletter'),
+
+    clear_fields:
+      get('clear_fields')
+  };
+}
+
+
+/**
+ * ============================================================
+ * ACTUALIZAR DATA DESDE _MANUAL
+ * ============================================================
+ *
+ * MUY IMPORTANTE:
+ *
+ * En _manual:
+ *
+ * campo vacío = NO CAMBIAR.
+ *
+ * clear_fields = BORRAR.
+ */
+
+function updateDataRecordFromManual(
+  dataSheet,
+  manual,
+  location
+) {
+
+  const entityId =
+    String(
+      manual.entity_id
+    )
+      .trim()
+      .toUpperCase();
+
+
+  const headers =
+    getHeaders(
+      dataSheet
+    );
+
+
+  const entityIdIndex =
+    headers.indexOf(
+      'entity_id'
+    );
+
+
+  if (
+    entityIdIndex === -1
+  ) {
+
+    throw new Error(
+      'No existe entity_id en data.'
+    );
+  }
+
+
+  const lastRow =
+    dataSheet.getLastRow();
+
+
+  if (
+    lastRow < 2
+  ) {
+
+    throw new Error(
+      'No existen registros en data.'
+    );
+  }
+
+
+  const ids =
+    dataSheet
+      .getRange(
+        2,
+        entityIdIndex + 1,
+        lastRow - 1,
+        1
+      )
+      .getValues()
+      .flat()
+      .map(
+        value =>
+          String(value)
+            .trim()
+            .toUpperCase()
+      );
+
+
+  const position =
+    ids.indexOf(
+      entityId
+    );
+
+
+  if (
+    position === -1
+  ) {
+
+    throw new Error(
+      'No existe en data el entity_id: ' +
+      entityId
+    );
+  }
+
+
+  const rowNumber =
+    position + 2;
+
+
+  const oldRow =
+    dataSheet
+      .getRange(
+        rowNumber,
+        1,
+        1,
+        headers.length
+      )
+      .getValues()[0];
+
+
+  const oldRecord =
+    rowToObject(
+      headers,
+      oldRow
+    );
+
+
+  /*
+   * Convertimos el manual en un registro DATA parcial.
+   */
+
+  const partial =
+    buildManualDataPatch(
+      manual,
+      location,
+      oldRecord
+    );
+
+
+  /*
+   * clear_fields
+   */
+
+  const clearFields =
+    parseClearFields(
+      manual.clear_fields
+    );
+
+
+  /*
+   * Construir fila final.
+   */
+
+  const newRow =
+    headers.map(
+      header => {
+
+        /*
+         * Si está explícitamente marcado para borrar.
+         */
+
+        if (
+          clearFields.includes(
+            header.toLowerCase()
+          )
+        ) {
+
+          return '';
+        }
+
+
+        /*
+         * Si el manual contiene el campo,
+         * usamos el nuevo valor.
+         */
+
+        if (
+          partial[header] !== undefined
+        ) {
+
+          return partial[header];
+        }
+
+
+        /*
+         * Si no, conservamos el anterior.
+         */
+
+        if (
+          oldRecord[header] !== undefined
+        ) {
+
+          return oldRecord[header];
+        }
+
+
+        return '';
+      }
+    );
+
+
+  dataSheet
+    .getRange(
+      rowNumber,
+      1,
+      1,
+      headers.length
+    )
+    .setValues([
+      newRow
+    ]);
+
+
+  console.log(
+    'DATA ACTUALIZADA MANUALMENTE: ' +
+    entityId
+  );
+}
+
+
+/**
+ * ============================================================
+ * CREAR PATCH DE DATA DESDE _MANUAL
+ * ============================================================
+ */
+
+function buildManualDataPatch(
+  manual,
+  location,
+  oldRecord
+) {
+
+  const patch = {};
+
+
+  /*
+   * ID
+   */
+
+  patch.entity_id =
+    manual.entity_id
+      .toUpperCase();
+
+
+  /*
+   * Campos de contenido.
+   *
+   * Solo se incluyen si _manual
+   * tiene un valor.
+   */
+
+  setIfNotEmpty(
+    patch,
+    'name',
+    manual.name
+  );
+
+  setIfNotEmpty(
+    patch,
+    'format',
+    manual.format
+  );
+
+  setIfNotEmpty(
+    patch,
+    'category',
+    manual.category
+  );
+
+  setIfNotEmpty(
+    patch,
+    'tags',
+    manual.tags
+  );
+
+  setIfNotEmpty(
+    patch,
+    'mission',
+    manual.mission
+  );
+
+  setIfNotEmpty(
+    patch,
+    'description',
+    manual.description
+  );
+
+  setIfNotEmpty(
+    patch,
+    'activity',
+    manual.activity
+  );
+
+  setIfNotEmpty(
+    patch,
+    'audience',
+    manual.audience
+  );
+
+  setIfNotEmpty(
+    patch,
+    'territory',
+    manual.territory
+  );
+
+  setIfNotEmpty(
+    patch,
+    'founded',
+    manual.founded
+  );
+
+  setIfNotEmpty(
+    patch,
+    'license',
+    manual.license
+  );
+
+  setIfNotEmpty(
+    patch,
+    'img',
+    manual.img
+  );
+
+  setIfNotEmpty(
+    patch,
+    'url',
+    manual.url
+  );
+
+  setIfNotEmpty(
+    patch,
+    'email',
+    manual.email_public
+  );
+
+  setIfNotEmpty(
+    patch,
+    'phone',
+    manual.phone
+  );
+
+  setIfNotEmpty(
+    patch,
+    'instagram',
+    manual.instagram
+  );
+
+  setIfNotEmpty(
+    patch,
+    'facebook',
+    manual.facebook
+  );
+
+  setIfNotEmpty(
+    patch,
+    'bsky',
+    manual.bsky
+  );
+
+  setIfNotEmpty(
+    patch,
+    'linkedin',
+    manual.linkedin
+  );
+
+  setIfNotEmpty(
+    patch,
+    'mastodon',
+    manual.mastodon
+  );
+
+  setIfNotEmpty(
+    patch,
+    'pixelfed',
+    manual.pixelfed
+  );
+
+  setIfNotEmpty(
+    patch,
+    'telegram',
+    manual.telegram
+  );
+
+  setIfNotEmpty(
+    patch,
+    'threads',
+    manual.threads
+  );
+
+  setIfNotEmpty(
+    patch,
+    'tiktok',
+    manual.tiktok
+  );
+
+  setIfNotEmpty(
+    patch,
+    'whatsapp',
+    manual.whatsapp
+  );
+
+  setIfNotEmpty(
+    patch,
+    'x',
+    manual.x
+  );
+
+  setIfNotEmpty(
+    patch,
+    'youtube',
+    manual.youtube
+  );
+
+  setIfNotEmpty(
+    patch,
+    'needs',
+    manual.needs
+  );
+
+  setIfNotEmpty(
+    patch,
+    'offers',
+    manual.offers
+  );
+
+
+  /*
+   * LOCALIZACIÓN
+   *
+   * Si se introduce location,
+   * recalculamos las coordenadas.
+   */
+
+  if (
+    manual.location
+  ) {
+
+    patch.island =
+      location.island;
+
+    patch.municipality =
+      location.municipality;
+
+    patch.lon =
+      location.lon;
+
+    patch.lat =
+      location.lat;
+  }
+
+
+  /*
+   * PRIVACIDAD
+   *
+   * Solo recalculamos los *_private
+   * si se ha proporcionado private_fields.
+   */
+
+  if (
+    manual.private_fields
+  ) {
+
+    const privateFields =
+      parsePrivateFields(
+        manual.private_fields
+      );
+
+
+    patch.name_private =
+      isPrivate(
+        privateFields,
+        'Nombre'
+      );
+
+    patch.format_private =
+      isPrivate(
+        privateFields,
+        'Tipo de entidad o proyecto'
+      );
+
+    patch.category_private =
+      isPrivate(
+        privateFields,
+        'Categoría'
+      );
+
+    patch.tags_private =
+      isPrivate(
+        privateFields,
+        'Etiquetas'
+      );
+
+    patch.mission_private =
+      isPrivate(
+        privateFields,
+        'Misión'
+      );
+
+    patch.description_private =
+      isPrivate(
+        privateFields,
+        'Descripción'
+      );
+
+    patch.location_private =
+      isPrivate(
+        privateFields,
+        'Ubicación'
+      );
+
+    patch.activity_private =
+      isPrivate(
+        privateFields,
+        'Actividades'
+      );
+
+    patch.audience_private =
+      isPrivate(
+        privateFields,
+        'Público'
+      );
+
+    patch.territory_private =
+      isPrivate(
+        privateFields,
+        'Ámbito territorial'
+      );
+
+    patch.founded_private =
+      isPrivate(
+        privateFields,
+        'Año de inicio'
+      );
+
+    patch.needs_private =
+      isPrivate(
+        privateFields,
+        'Necesidades'
+      );
+
+    patch.offers_private =
+      isPrivate(
+        privateFields,
+        'Ofertas'
+      );
+
+    patch.img_private =
+      isPrivate(
+        privateFields,
+        'Imagen'
+      );
+
+    patch.url_private =
+      isPrivate(
+        privateFields,
+        'Página web'
+      );
+
+    patch.email_private =
+      isPrivate(
+        privateFields,
+        'Correo Electrónico'
+      );
+
+    patch.phone_private =
+      isPrivate(
+        privateFields,
+        'Teléfono'
+      );
+
+    patch.instagram_private =
+      isPrivate(
+        privateFields,
+        'Instagram'
+      );
+
+    patch.facebook_private =
+      isPrivate(
+        privateFields,
+        'Facebook'
+      );
+
+    patch.bsky_private =
+      isPrivate(
+        privateFields,
+        'Bluesky'
+      );
+
+    patch.linkedin_private =
+      isPrivate(
+        privateFields,
+        'LinkedIn'
+      );
+
+    patch.mastodon_private =
+      isPrivate(
+        privateFields,
+        'Mastodon'
+      );
+
+    patch.pixelfed_private =
+      isPrivate(
+        privateFields,
+        'Pixelfed'
+      );
+
+    patch.telegram_private =
+      isPrivate(
+        privateFields,
+        'Telegram'
+      );
+
+    patch.threads_private =
+      isPrivate(
+        privateFields,
+        'Threads'
+      );
+
+    patch.tiktok_private =
+      isPrivate(
+        privateFields,
+        'TikTok'
+      );
+
+    patch.whatsapp_private =
+      isPrivate(
+        privateFields,
+        'WhatsApp'
+      );
+
+    patch.x_private =
+      isPrivate(
+        privateFields,
+        'X'
+      );
+
+    patch.youtube_private =
+      isPrivate(
+        privateFields,
+        'YouTube'
+      );
+  }
+
+
+  /*
+   * ORIGEN
+   */
+
+  setIfNotEmpty(
+    patch,
+    'source',
+    manual.source
+  );
+
+  setIfNotEmpty(
+    patch,
+    'source_reference',
+    manual.source_reference
+  );
+
+
+  /*
+   * ESTADO
+   */
+
+  setIfNotEmpty(
+    patch,
+    'verified',
+    manual.verified
+  );
+
+  setIfNotEmpty(
+    patch,
+    'status',
+    manual.status
+  );
+
+
+  /*
+   * CONTRIBUYENTE
+   */
+
+  setIfNotEmpty(
+    patch,
+    'contributor_creator',
+    manual.contributor_creator
+  );
+
+  setIfNotEmpty(
+    patch,
+    'contributor_email',
+    manual.contributor_email
+  );
+
+
+  /*
+   * CONSENTIMIENTOS
+   */
+
+  setIfNotEmpty(
+    patch,
+    'consent_publication',
+    manual.consent_publication
+  );
+
+  setIfNotEmpty(
+    patch,
+    'consent_accuracy',
+    manual.consent_accuracy
+  );
+
+  setIfNotEmpty(
+    patch,
+    'consent_contact',
+    manual.consent_contact
+  );
+
+  setIfNotEmpty(
+    patch,
+    'consent_whatsapp',
+    manual.consent_whatsapp
+  );
+
+  setIfNotEmpty(
+    patch,
+    'consent_newsletter',
+    manual.consent_newsletter
+  );
+
+
+  /*
+   * FECHA DE REVISIÓN
+   *
+   * Toda modificación manual genera
+   * una nueva fecha de revisión.
+   */
+
+  patch.date_revised =
+    new Date();
+
+
+  if (
+    manual.contributor_revision
+  ) {
+
+    patch.contributor_revision =
+      manual.contributor_revision;
+
+  } else if (
+    manual.contributor_creator
+  ) {
+
+    patch.contributor_revision =
+      manual.contributor_creator;
+  }
+
+
+  /*
+   * date_created no se modifica
+   * en una actualización.
+   */
+
+  return patch;
+}
+
+
+/**
+ * ============================================================
+ * NUEVO REGISTRO MANUAL
+ * ============================================================
+ */
+
+function buildManualNewRecord(
+  manual,
+  location
+) {
+
+  const now =
+    new Date();
+
+
+  return buildDataRecord(
+    manual,
+    location,
+    now,
+    now,
+    {}
+  );
+}
+
+
+/**
+ * ============================================================
+ * AUXILIAR
+ * ============================================================
+ */
+
+function setIfNotEmpty(
+  object,
+  key,
+  value
+) {
+
+  if (
+    value !== undefined &&
+    value !== null &&
+    String(value).trim() !== ''
+  ) {
+
+    object[key] =
+      value;
+  }
+}
+
+
+/**
+ * ============================================================
+ * CLEAR_FIELDS
+ * ============================================================
+ */
+
+function parseClearFields(
   value
 ) {
 
@@ -1418,8 +2710,32 @@ function parsePrivateFields(
 
 
 /**
- * Comprueba si un campo está seleccionado como privado.
+ * ============================================================
+ * PRIVATE FIELDS
+ * ============================================================
  */
+
+function parsePrivateFields(
+  value
+) {
+
+  if (!value) {
+    return [];
+  }
+
+
+  return String(value)
+    .split(',')
+    .map(
+      item =>
+        item
+          .trim()
+          .toLowerCase()
+    )
+    .filter(Boolean);
+}
+
+
 function isPrivate(
   privateFields,
   label
@@ -1435,9 +2751,240 @@ function isPrivate(
 
 /**
  * ============================================================
+ * PROCESSED
+ * ============================================================
+ */
+
+function isProcessed(
+  value
+) {
+
+  const normalized =
+    String(value || '')
+      .trim()
+      .toLowerCase();
+
+
+  return (
+    normalized === 'sí' ||
+    normalized === 'si' ||
+    normalized === 'true' ||
+    normalized === '1' ||
+    normalized === 'procesado'
+  );
+}
+
+
+/**
+ * ============================================================
+ * MARCAR _MANUAL COMO PROCESADO
+ * ============================================================
+ */
+
+function markManualProcessed(
+  sheet,
+  rowNumber,
+  entityId
+) {
+
+  const headers =
+    getHeaders(sheet);
+
+
+  const processedIndex =
+    headers.indexOf(
+      'processed'
+    );
+
+
+  const processedAtIndex =
+    headers.indexOf(
+      'processed_at'
+    );
+
+
+  const resultIndex =
+    headers.indexOf(
+      'processing_result'
+    );
+
+
+  if (
+    processedIndex !== -1
+  ) {
+
+    sheet
+      .getRange(
+        rowNumber,
+        processedIndex + 1
+      )
+      .setValue(
+        'Sí'
+      );
+  }
+
+
+  if (
+    processedAtIndex !== -1
+  ) {
+
+    sheet
+      .getRange(
+        rowNumber,
+        processedAtIndex + 1
+      )
+      .setValue(
+        new Date()
+      );
+  }
+
+
+  if (
+    resultIndex !== -1
+  ) {
+
+    sheet
+      .getRange(
+        rowNumber,
+        resultIndex + 1
+      )
+      .setValue(
+        'OK: ' +
+        entityId
+      );
+  }
+}
+
+
+/**
+ * ============================================================
+ * MARCAR ERROR EN _MANUAL
+ * ============================================================
+ */
+
+function markManualError(
+  sheet,
+  rowNumber,
+  error
+) {
+
+  const headers =
+    getHeaders(sheet);
+
+
+  const processedIndex =
+    headers.indexOf(
+      'processed'
+    );
+
+
+  const processedAtIndex =
+    headers.indexOf(
+      'processed_at'
+    );
+
+
+  const resultIndex =
+    headers.indexOf(
+      'processing_result'
+    );
+
+
+  if (
+    processedIndex !== -1
+  ) {
+
+    sheet
+      .getRange(
+        rowNumber,
+        processedIndex + 1
+      )
+      .setValue(
+        'ERROR'
+      );
+  }
+
+
+  if (
+    processedAtIndex !== -1
+  ) {
+
+    sheet
+      .getRange(
+        rowNumber,
+        processedAtIndex + 1
+      )
+      .setValue(
+        new Date()
+      );
+  }
+
+
+  if (
+    resultIndex !== -1
+  ) {
+
+    sheet
+      .getRange(
+        rowNumber,
+        resultIndex + 1
+      )
+      .setValue(
+        error.message
+      );
+  }
+}
+
+
+/**
+ * ============================================================
+ * ESCRIBIR ENTITY_ID EN _MANUAL
+ * ============================================================
+ */
+
+function writeManualEntityId(
+  sheet,
+  rowNumber,
+  entityId
+) {
+
+  const headers =
+    getHeaders(sheet);
+
+
+  const index =
+    headers.indexOf(
+      'entity_id'
+    );
+
+
+  if (
+    index === -1
+  ) {
+
+    throw new Error(
+      'No existe entity_id en _manual.'
+    );
+  }
+
+
+  sheet
+    .getRange(
+      rowNumber,
+      index + 1
+    )
+    .setValue(
+      entityId
+    );
+}
+
+
+/**
+ * ============================================================
  * ESCRIBIR ENTITY_ID EN FORM_RESPONSES
  * ============================================================
  */
+
 function writeEntityIdToFormResponse(
   sheet,
   row,
@@ -1487,6 +3034,7 @@ function writeEntityIdToFormResponse(
  * LOCALIZACIONES
  * ============================================================
  */
+
 function loadLocations() {
 
   const sheet =
@@ -1603,6 +3151,7 @@ function loadLocations() {
  * RESOLVER LOCALIZACIÓN
  * ============================================================
  */
+
 function resolveLocation(
   locationValue,
   locations
@@ -1652,6 +3201,7 @@ function resolveLocation(
  * ESCRIBIR DATA
  * ============================================================
  */
+
 function appendDataRecord(
   sheet,
   record
@@ -1678,7 +3228,9 @@ function appendDataRecord(
     );
 
 
-  sheet.appendRow(row);
+  sheet.appendRow(
+    row
+  );
 }
 
 
@@ -1687,6 +3239,7 @@ function appendDataRecord(
  * GENERAR ENTITY_ID
  * ============================================================
  */
+
 function generateUniqueEntityId(
   sheet
 ) {
@@ -1737,7 +3290,9 @@ function generateUniqueEntityId(
 
 
   const existing =
-    new Set(existingIds);
+    new Set(
+      existingIds
+    );
 
 
   let id;
@@ -1781,6 +3336,7 @@ function generateUniqueEntityId(
  * CABECERAS
  * ============================================================
  */
+
 function getHeaders(
   sheet
 ) {
@@ -1805,6 +3361,7 @@ function getHeaders(
  * ÍNDICE DE CABECERAS
  * ============================================================
  */
+
 function createHeaderIndex(
   headers
 ) {
@@ -1832,6 +3389,7 @@ function createHeaderIndex(
  * OBTENER CELDA
  * ============================================================
  */
+
 function getCell(
   row,
   index,
@@ -1861,6 +3419,7 @@ function getCell(
  * FILA → OBJETO
  * ============================================================
  */
+
 function rowToObject(
   headers,
   row
@@ -1888,6 +3447,7 @@ function rowToObject(
  * OBTENER HOJA
  * ============================================================
  */
+
 function getSheet(
   name
 ) {
@@ -1895,7 +3455,9 @@ function getSheet(
   const sheet =
     SpreadsheetApp
       .getActiveSpreadsheet()
-      .getSheetByName(name);
+      .getSheetByName(
+        name
+      );
 
 
   if (!sheet) {
