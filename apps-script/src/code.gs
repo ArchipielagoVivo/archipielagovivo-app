@@ -442,6 +442,9 @@ function normaliseFormResponse(
     img:
       get('img'),
 
+    video:
+      get('video'),
+
     instagram:
       get('instagram'),
 
@@ -857,7 +860,18 @@ function buildDataRecord(
   let name;
 
 
+  /*
+   * _manual utiliza el campo "name" directamente.
+   * El formulario utiliza name_individual / name_entity.
+   */
   if (
+    response.name
+  ) {
+
+    name =
+      response.name;
+
+  } else if (
     response.format
   ) {
 
@@ -1111,6 +1125,16 @@ function buildDataRecord(
       isPrivate(
         privateFields,
         'Teléfono'
+      ),
+
+
+    video:
+      response.video,
+
+    video_private:
+      isPrivate(
+        privateFields,
+        'Vídeo'
       ),
 
 
@@ -1780,6 +1804,9 @@ function normaliseManualResponse(
     phone:
       get('phone'),
 
+    video:
+      get('video'),
+
     instagram:
       get('instagram'),
 
@@ -2210,6 +2237,12 @@ function buildManualDataPatch(
 
   setIfNotEmpty(
     patch,
+    'video',
+    manual.video
+  );
+
+  setIfNotEmpty(
+    patch,
     'instagram',
     manual.instagram
   );
@@ -2435,6 +2468,12 @@ function buildManualDataPatch(
       isPrivate(
         privateFields,
         'Teléfono'
+      );
+
+    patch.video_private =
+      isPrivate(
+        privateFields,
+        'Vídeo'
       );
 
     patch.instagram_private =
