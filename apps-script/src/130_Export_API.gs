@@ -212,6 +212,9 @@ function buildExportManifest() {
 
     tv:
       {
+        schema_version:
+          2,
+
         playlist_id:
           CONFIG.TV_PLAYLIST_ID,
 

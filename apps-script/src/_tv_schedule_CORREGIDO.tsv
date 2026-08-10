@@ -1,0 +1,51 @@
+schedule_id	channel_id	days	start	end	program_id	media_id	selection_rule	max_duration_minutes	priority	valid_from	valid_to	status
+AV-ROT-0000	*	mon,tue,wed,thu,fri,sat,sun	00:00	00:15	archipielago-vivo		entity_rotation	15	100			Activo
+AV-ROT-0200	*	mon,tue,wed,thu,fri,sat,sun	02:00	02:15	archipielago-vivo		entity_rotation	15	100			Activo
+AV-ROT-0400	*	mon,tue,wed,thu,fri,sat,sun	04:00	04:15	archipielago-vivo		entity_rotation	15	100			Activo
+AV-SAFE-0430	*	mon,tue,wed,thu,fri,sat,sun	04:30	05:00	archipielago-vivo		entity_deadline	30	110			Activo
+AV-ROT-0600	*	mon,tue,wed,thu,fri,sat,sun	06:00	06:15	archipielago-vivo		entity_rotation	15	100			Activo
+AV-ROT-0800	*	mon,tue,wed,thu,fri,sat,sun	08:00	08:15	archipielago-vivo		entity_rotation	15	100			Activo
+AV-NEW-0900	*	mon,tue,wed,thu,fri,sat,sun	09:00	09:20	archipielago-vivo		entity_new	20	120			Activo
+AV-ROT-1000	*	mon,tue,wed,thu,fri,sat,sun	10:00	10:15	archipielago-vivo		entity_rotation	15	100			Activo
+AV-ROT-1200	*	mon,tue,wed,thu,fri,sat,sun	12:00	12:15	archipielago-vivo		entity_rotation	15	100			Activo
+AV-NEW-1330	*	mon,tue,wed,thu,fri,sat,sun	13:30	13:50	archipielago-vivo		entity_new	20	120			Activo
+AV-ROT-1400	*	mon,tue,wed,thu,fri,sat,sun	14:00	14:15	archipielago-vivo		entity_rotation	15	100			Activo
+AV-ROT-1600	*	mon,tue,wed,thu,fri,sat,sun	16:00	16:15	archipielago-vivo		entity_rotation	15	100			Activo
+AV-ROT-1800	*	mon,tue,wed,thu,fri,sat,sun	18:00	18:15	archipielago-vivo		entity_rotation	15	100			Activo
+AV-NEW-1830	*	mon,tue,wed,thu,fri,sat,sun	18:30	18:50	archipielago-vivo		entity_new	20	120			Activo
+AV-ROT-2000	*	mon,tue,wed,thu,fri,sat,sun	20:00	20:15	archipielago-vivo		entity_rotation	15	100			Activo
+AV-NEW-2130	*	mon,tue,wed,thu,fri,sat,sun	21:30	21:50	archipielago-vivo		entity_new	20	120			Activo
+AV-ROT-2200	*	mon,tue,wed,thu,fri,sat,sun	22:00	22:15	archipielago-vivo		entity_rotation	15	100			Activo
+GEN-001	general	mon,tue,wed,thu,fri,sat,sun	00:00	04:00	archivo		program_rotation		10			Activo
+GEN-002	general	mon,tue,wed,thu,fri,sat,sun	04:00	07:00	memoria-indigena		program_rotation		10			Activo
+GEN-003	general	mon,tue,wed,thu,fri,sat,sun	07:00	09:00	saberes		program_rotation		10			Activo
+GEN-004	general	mon,tue,wed,thu,fri,sat,sun	09:00	11:00	islas-vivas		program_rotation		10			Activo
+GEN-005	general	mon,tue,wed,thu,fri,sat,sun	11:00	13:00	agua-y-mar		program_rotation		10			Activo
+GEN-006	general	mon,tue,wed,thu,fri,sat,sun	13:00	15:00	trabajo-y-modelo		program_rotation		10			Activo
+GEN-007	general	mon,tue,wed,thu,fri,sat,sun	15:00	17:00	cuidados		program_rotation		10			Activo
+GEN-008	general	mon,tue,wed,thu,fri,sat,sun	17:00	19:00	vivienda		program_rotation		10			Activo
+GEN-009	general	mon,tue,wed,thu,fri,sat,sun	19:00	21:00	territorio-en-tension		program_rotation		10			Activo
+GEN-010	general	mon,tue,wed,thu,fri,sat,sun	21:00	23:00	investigacion		program_rotation		10			Activo
+GEN-011	general	mon,tue,wed,thu,fri,sat,sun	23:00	24:00	alternativas		program_rotation		10			Activo
+FUE-001	fuerteventura	mon,tue,wed,thu,fri,sat,sun	00:00	04:00	investigacion		program_rotation		10			Activo
+FUE-002	fuerteventura	mon,tue,wed,thu,fri,sat,sun	04:00	06:00	memoria-indigena		program_rotation		10			Activo
+FUE-003	fuerteventura	mon,tue,wed,thu,fri,sat,sun	06:00	08:00	saberes		program_rotation		10			Activo
+FUE-004	fuerteventura	mon,tue,wed,thu,fri,sat,sun	08:00	10:00	agua-y-mar		program_rotation		10			Activo
+FUE-005	fuerteventura	mon,tue,wed,thu,fri,sat,sun	10:00	12:00	islas-vivas		program_rotation		10			Activo
+FUE-006	fuerteventura	mon,tue,wed,thu,fri,sat,sun	12:00	14:00	movilidad		program_rotation		10			Activo
+FUE-007	fuerteventura	mon,tue,wed,thu,fri,sat,sun	14:00	16:00	vivienda		program_rotation		10			Activo
+FUE-008	fuerteventura	mon,tue,wed,thu,fri,sat,sun	16:00	20:00	territorio-en-tension		program_rotation		10			Activo
+FUE-009	fuerteventura	mon,tue,wed,thu,fri,sat,sun	20:00	22:00	memoria-indigena		program_rotation		10			Activo
+FUE-010	fuerteventura	mon,tue,wed,thu,fri,sat,sun	22:00	24:00	saberes		program_rotation		10			Activo
+TER-001	territorio	mon,tue,wed,thu,fri,sat,sun	00:00	04:00	territorio-en-tension		program_rotation		10			Activo
+TER-002	territorio	mon,tue,wed,thu,fri,sat,sun	04:00	08:00	agua-y-mar		program_rotation		10			Activo
+TER-003	territorio	mon,tue,wed,thu,fri,sat,sun	08:00	12:00	vivienda		program_rotation		10			Activo
+TER-004	territorio	mon,tue,wed,thu,fri,sat,sun	12:00	16:00	investigacion		program_rotation		10			Activo
+TER-005	territorio	mon,tue,wed,thu,fri,sat,sun	16:00	18:00	movilidad		program_rotation		10			Activo
+TER-006	territorio	mon,tue,wed,thu,fri,sat,sun	18:00	21:00	trabajo-y-modelo		program_rotation		10			Activo
+TER-007	territorio	mon,tue,wed,thu,fri,sat,sun	21:00	24:00	islas-vivas		program_rotation		10			Activo
+MEM-001	memoria	mon,tue,wed,thu,fri,sat,sun	00:00	08:00	archivo		program_rotation		10			Activo
+MEM-002	memoria	mon,tue,wed,thu,fri,sat,sun	08:00	13:00	memoria-indigena		program_rotation		10			Activo
+MEM-003	memoria	mon,tue,wed,thu,fri,sat,sun	13:00	18:00	saberes		program_rotation		10			Activo
+MEM-004	memoria	mon,tue,wed,thu,fri,sat,sun	18:00	22:00	trabajo-y-modelo		program_rotation		10			Activo
+MEM-005	memoria	mon,tue,wed,thu,fri,sat,sun	22:00	24:00	archivo		program_rotation		10			Activo
