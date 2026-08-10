@@ -186,6 +186,9 @@ function buildExportManifest() {
       new Date()
         .toISOString(),
 
+    source_entities:
+      getAllDataRecords().length,
+
     public_entities:
       result.entities.length,
 

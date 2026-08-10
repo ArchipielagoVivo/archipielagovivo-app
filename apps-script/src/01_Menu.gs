@@ -4,6 +4,9 @@
 
 function onOpen() {
 
+  rememberActiveProjectSpreadsheet_();
+
+
   SpreadsheetApp.getUi()
     .createMenu('Archipiélago Vivo')
     .addItem(
@@ -40,6 +43,40 @@ function onOpen() {
     .addItem(
       'Exports · Ver URLs',
       'showExportUrls'
+    )
+    .addSeparator()
+    .addItem(
+      'TV · Sincronizar vídeos de fichas',
+      'syncEntityVideosToTvMedia'
+    )
+    .addItem(
+      'TV · Actualizar metadatos de catálogo',
+      'refreshTvMediaYouTubeMetadata'
+    )
+    .addSeparator()
+    .addItem(
+      'ADMIN · Registrar hoja maestra para Web App',
+      'registerProjectSpreadsheetForWebApp'
+    )
+    .addItem(
+      'ADMIN · Vaciar datos de prueba',
+      'resetTestData'
+    )
+    .addItem(
+      'ADMIN · Reprocesar fuentes → data + _consents',
+      'rebuildDataAndConsentsFromFormResponses'
+    )
+    .addItem(
+      'ADMIN · Reparar localizaciones DATA',
+      'repairDataLocationsFromSources'
+    )
+    .addItem(
+      'ADMIN · Normalizar consentimientos DATA',
+      'normalizeDataConsentBooleans'
+    )
+    .addItem(
+      'ADMIN · Diagnóstico tipos consentimientos',
+      'inspectDataConsentTypes'
     )
     .addToUi();
 }

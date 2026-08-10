@@ -6,57 +6,82 @@ function getEffectivePublicationConsent(
   response
 ) {
 
-  const first =
-    String(
-      response.consent_publication || ''
+  return (
+    isYes(
+      response.consent_publication
+    ) ||
+    isYes(
+      response.re_consent_publication
     )
-      .trim();
-
-
-  const second =
-    String(
-      response.re_consent_publication || ''
-    )
-      .trim();
-
-
-  if (
-    isYes(first)
-  ) {
-
-    return first;
-  }
-
-
-  if (
-    isYes(second)
-  ) {
-
-    return second;
-  }
-
-
-  if (
-    isNo(second)
-  ) {
-
-    return second;
-  }
-
-
-  return first;
+  );
 }
 
 
-function isYes(value) {
+function toConsentBoolean(
+  value
+) {
+
+  return isYes(
+    value
+  );
+}
+
+
+function hasConsentInputValue(
+  value
+) {
+
+  if (
+    typeof value === 'boolean'
+  ) {
+
+    return true;
+  }
+
+
+  return (
+    value !== undefined &&
+    value !== null &&
+    String(
+      value
+    ).trim() !== ''
+  );
+}
+
+
+function isYes(
+  value
+) {
+
+  if (
+    value === true ||
+    value === 1
+  ) {
+
+    return true;
+  }
+
+
+  if (
+    value === false ||
+    value === 0
+  ) {
+
+    return false;
+  }
+
 
   const normalized =
-    String(value || '')
+    String(
+      value || ''
+    )
       .trim()
       .toLowerCase();
 
 
   return (
+    normalized === 'true' ||
+    normalized === '1' ||
     normalized === 'sí' ||
     normalized === 'si' ||
     normalized.startsWith('sí,') ||
@@ -65,15 +90,39 @@ function isYes(value) {
 }
 
 
-function isNo(value) {
+function isNo(
+  value
+) {
+
+  if (
+    value === false ||
+    value === 0
+  ) {
+
+    return true;
+  }
+
+
+  if (
+    value === true ||
+    value === 1
+  ) {
+
+    return false;
+  }
+
 
   const normalized =
-    String(value || '')
+    String(
+      value || ''
+    )
       .trim()
       .toLowerCase();
 
 
   return (
+    normalized === 'false' ||
+    normalized === '0' ||
     normalized === 'no' ||
     normalized.startsWith('no,')
   );

@@ -1,0 +1,43 @@
+CORRECCIÓN ROBUSTA DE LOCALIZACIONES
+
+El registro PEGVALFW demuestra que DATA todavía contiene:
+island       = vacío
+municipality = vacío
+lon/lat      = coordenadas de Canarias
+
+Eso significa que la exportación está leyendo correctamente DATA:
+el warning island="" es correcto.
+
+Esta versión hace dos cosas:
+
+1. Renombra internamente las funciones de localización:
+   avLoadLocations_
+   avResolveLocation_
+   avNormalizeResolvedLocation_
+
+   Así un antiguo archivo monolítico que todavía tenga una función
+   resolveLocation() no puede sobrescribir la implementación nueva.
+
+2. Añade:
+   ADMIN · Reparar localizaciones DATA
+
+   Esta acción relee location desde form_responses y desde las operaciones
+   _manual procesadas, resuelve _locations y escribe directamente en DATA:
+   island, municipality, lon, lat.
+
+Para location=Canarias el resultado debe ser:
+island       = Canarias
+municipality = vacío
+lon          = -15.7368719
+lat          = 28.64781921
+
+PASOS RECOMENDADOS
+==================
+1. Instalar el patch.
+2. Guardar Apps Script.
+3. Recargar Sheets.
+4. Ejecutar ADMIN · Reparar localizaciones DATA.
+5. Confirmar en PEGVALFW que island = Canarias.
+6. Actualizar la implementación del Web App a una nueva versión porque
+   también se han actualizado las llamadas internas de localización.
+7. Abrir ?export=manifest.

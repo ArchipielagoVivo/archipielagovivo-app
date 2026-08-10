@@ -574,6 +574,16 @@ function buildDataRecord(
       ),
 
 
+    github:
+      response.github,
+
+    github_private:
+      isPrivate(
+        privateFields,
+        'GitHub'
+      ),
+
+
     mastodon:
       response.mastodon,
 
@@ -718,21 +728,36 @@ function buildDataRecord(
      */
 
     consent_publication:
-      getEffectivePublicationConsent(
-        response
+      avConsentBoolean_(
+        getEffectivePublicationConsent(
+          response
+        )
       ),
 
     consent_accuracy:
-      response.consent_accuracy,
+      avConsentBoolean_(
+        response.consent_accuracy
+      ),
 
     consent_contact:
-      response.consent_contact,
+      avConsentBoolean_(
+        response.consent_contact
+      ),
 
     consent_whatsapp:
-      response.consent_whatsapp,
+      avConsentBoolean_(
+        response.consent_whatsapp
+      ),
 
     consent_newsletter:
-      response.consent_newsletter
+      avConsentBoolean_(
+        response.consent_newsletter
+      ),
+
+    consent_youtube:
+      avConsentBoolean_(
+        response.consent_youtube
+      )
   };
 }
 

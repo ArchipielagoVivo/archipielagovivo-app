@@ -250,11 +250,11 @@ function processManualRow(
 
 
   const locations =
-    loadLocations();
+    avLoadLocations_();
 
 
   const location =
-    resolveLocation(
+    avResolveLocation_(
       manual.location,
       locations
     );
@@ -434,6 +434,15 @@ function normaliseManualResponse(
     manual_id:
       get('manual_id'),
 
+    processed:
+      get('processed'),
+
+    processed_at:
+      get('processed_at'),
+
+    processing_result:
+      get('processing_result'),
+
     entity_id:
       get('entity_id'),
 
@@ -499,6 +508,9 @@ function normaliseManualResponse(
 
     linkedin:
       get('linkedin'),
+
+    github:
+      get('github'),
 
     mastodon:
       get('mastodon'),
@@ -574,6 +586,9 @@ function normaliseManualResponse(
 
     consent_newsletter:
       get('consent_newsletter'),
+
+    consent_youtube:
+      get('consent_youtube'),
 
     clear_fields:
       get('clear_fields')
@@ -950,6 +965,12 @@ function buildManualDataPatch(
 
   setIfNotEmpty(
     patch,
+    'github',
+    manual.github
+  );
+
+  setIfNotEmpty(
+    patch,
     'mastodon',
     manual.mastodon
   );
@@ -1183,6 +1204,12 @@ function buildManualDataPatch(
         'LinkedIn'
       );
 
+    patch.github_private =
+      isPrivate(
+        privateFields,
+        'GitHub'
+      );
+
     patch.mastodon_private =
       isPrivate(
         privateFields,
@@ -1288,34 +1315,40 @@ function buildManualDataPatch(
    * CONSENTIMIENTOS
    */
 
-  setIfNotEmpty(
+  setConsentBooleanIfProvided(
     patch,
     'consent_publication',
     manual.consent_publication
   );
 
-  setIfNotEmpty(
+  setConsentBooleanIfProvided(
     patch,
     'consent_accuracy',
     manual.consent_accuracy
   );
 
-  setIfNotEmpty(
+  setConsentBooleanIfProvided(
     patch,
     'consent_contact',
     manual.consent_contact
   );
 
-  setIfNotEmpty(
+  setConsentBooleanIfProvided(
     patch,
     'consent_whatsapp',
     manual.consent_whatsapp
   );
 
-  setIfNotEmpty(
+  setConsentBooleanIfProvided(
     patch,
     'consent_newsletter',
     manual.consent_newsletter
+  );
+
+  setConsentBooleanIfProvided(
+    patch,
+    'consent_youtube',
+    manual.consent_youtube
   );
 
 
@@ -1327,6 +1360,10 @@ function buildManualDataPatch(
    */
 
   patch.date_revised =
+    parseRebuildDate(
+      manual.date_revised ||
+      manual.processed_at
+    ) ||
     new Date();
 
 
@@ -1378,6 +1415,36 @@ function buildManualNewRecord(
     now,
     {}
   );
+}
+
+
+/**
+ * ============================================================
+ * AUXILIAR
+ * ============================================================
+ */
+
+
+function setConsentBooleanIfProvided(
+  object,
+  key,
+  value
+) {
+
+  if (
+    !hasConsentInputValue(
+      value
+    )
+  ) {
+
+    return;
+  }
+
+
+  object[key] =
+    toConsentBoolean(
+      value
+    );
 }
 
 

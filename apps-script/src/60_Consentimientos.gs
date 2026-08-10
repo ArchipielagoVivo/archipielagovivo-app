@@ -15,7 +15,19 @@ function getConsentState(
 ) {
 
   if (
-    isYes(value)
+    !hasConsentInputValue(
+      value
+    )
+  ) {
+
+    return null;
+  }
+
+
+  if (
+    isYes(
+      value
+    )
   ) {
 
     return 'granted';
@@ -23,7 +35,9 @@ function getConsentState(
 
 
   if (
-    isNo(value)
+    isNo(
+      value
+    )
   ) {
 
     return 'denied';
@@ -70,10 +84,8 @@ function hasConsentFieldInPartialInput(
     purpose === 'publication'
   ) {
 
-    return (
-      String(
-        response.consent_publication || ''
-      ).trim() !== ''
+    return hasConsentInputValue(
+      response.consent_publication
     );
   }
 
@@ -84,12 +96,10 @@ function hasConsentFieldInPartialInput(
     ];
 
 
-  return (
-    String(
-      response[
-        definition.field
-      ] || ''
-    ).trim() !== ''
+  return hasConsentInputValue(
+    response[
+      definition.field
+    ]
   );
 }
 
@@ -177,6 +187,11 @@ function recordInitialConsents(
     meta || {};
 
 
+  const eventDate =
+    meta.eventDate ||
+    new Date();
+
+
   Object.keys(
     CONSENT_DEFINITIONS
   ).forEach(
@@ -230,7 +245,7 @@ function recordInitialConsents(
 
           granted_at:
             state === 'granted'
-              ? new Date()
+              ? eventDate
               : '',
 
           withdrawn_at:
@@ -281,6 +296,11 @@ function recordConsentChanges(
 
   oldRecord =
     oldRecord || {};
+
+
+  const eventDate =
+    meta.eventDate ||
+    new Date();
 
 
   Object.keys(
@@ -353,7 +373,7 @@ function recordConsentChanges(
         withdrawLatestGrantedConsent(
           entityId,
           purpose,
-          new Date()
+          eventDate
         );
       }
 
@@ -379,7 +399,7 @@ function recordConsentChanges(
               'granted',
 
             granted_at:
-              new Date(),
+              eventDate,
 
             withdrawn_at:
               '',
