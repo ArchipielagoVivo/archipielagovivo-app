@@ -1,0 +1,33 @@
+BOOLEANOS + REPROCESADO
+
+DATA
+====
+consent_publication
+consent_accuracy
+consent_contact
+consent_whatsapp
+consent_newsletter
+
+se guardan como booleanos reales TRUE/FALSE.
+
+form_responses conserva la respuesta original de Google Forms.
+_consents conserva historial/evidencia: granted, denied, withdrawn,
+fechas, versión, texto y fuente.
+
+REPROCESADO
+===========
+Menú:
+Archipiélago Vivo > ADMIN · Reconstruir data + _consents
+
+- vacía data y _consents
+- reconstruye ambos desde form_responses
+- NO borra Google Forms
+- NO borra form_responses
+- conserva entity_id
+- conserva verified/status/license existentes
+- usa Timestamp del formulario para granted_at
+- se niega a ejecutar si _manual contiene registros
+
+Nota: si Google Forms ya sobrescribió una respuesta editada antes de empezar
+a guardar historial en _consents, el reprocesado solo puede reconstruir el
+estado actual, no estados históricos ya perdidos.
