@@ -1,0 +1,35 @@
+ARCHIPIÉLAGO VIVO · CORRECCIÓN _MANUAL / LOCATION
+==================================================
+
+Problema corregido
+------------------
+`processManualRow` resolvía siempre `manual.location` antes de saber si la fila
+era un alta nueva o una actualización. Como `avResolveLocation_()` rechaza un
+valor vacío, cualquier actualización manual sin `location` fallaba con:
+
+  La localización está vacía.
+
+Esto contradecía la regla ya definida para `_manual`:
+
+  campo vacío = NO CAMBIAR
+
+Comportamiento nuevo
+--------------------
+1. Si `_manual.location` contiene un valor:
+   - se resuelve contra `_locations`;
+   - se actualizan island / municipality / lon / lat.
+
+2. Si `_manual.location` está vacío y la fila tiene `entity_id`:
+   - NO se intenta resolver una localización;
+   - se procesan los demás campos;
+   - la ubicación que ya existe en `data` se conserva intacta.
+
+   Esto cubre también las entidades originadas en `form_responses`, porque su
+   ubicación ya fue incorporada a `data` durante el alta/sincronización. En el
+   reprocesado completo, `15_Reprocesar.gs` ya conserva explícitamente la
+   localización reconstruida desde form_responses antes de reaplicar _manual.
+
+3. Si es un ALTA NUEVA nacida exclusivamente en `_manual` y no tiene location:
+   - sigue siendo error, porque no existe ninguna ubicación previa que conservar.
+
+No se modifica `_tv_schedule`, exportes ni el modelo TV.
