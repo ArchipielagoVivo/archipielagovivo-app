@@ -118,25 +118,56 @@ La estructura puede ampliarse cuando aparezcan nuevos componentes del sistema.
 
 # Apps Script
 
-El código de **Google Apps Script** se almacena en:
+El código de **Google Apps Script** se almacena en `apps-script/src/`.
+Los módulos están organizados por responsabilidad. Archivos clave presentes:
 
-```text
-apps-script/src/
-```
+- `00_Config.gs`                : configuración global y constantes (incluye referencia a la hoja maestra)
+- `01_Menu.gs`                  : menú del proyecto en la hoja
+- `05_Admin_Reset.gs`           : utilidades administrativas
+- `10_Formulario.gs`            : ingestión y procesamiento de respuestas de Forms
+- `15_Reprocesar.gs`            : re-procesado y reindexado
+- `20_Data.gs`                  : generación y ensamblado de la hoja `data`
+- `30_Manual.gs`                : herramientas manuales de mantenimiento
+- `40_Privacidad.gs`            : lógica de privacidad y control de export
+- `45_Data_Consent_Booleans.gs` : normalización y corrección de booleanos
+- `50_Localizaciones.gs`        : tablas y helpers de `_locations`
+- `60_Consentimientos.gs`       : definición y gestión de `_consents`
+- `65_SourceReferences.gs`      : gestión de referencias y fuentes
+- `70_FormSync.gs`              : sincronización de ediciones de formularios
+- `80_GDPR.gs`                  : endpoints y helpers GDPR
+- `90_Utils.gs`                 : utilidades generales
+- `100_Publicacion.gs`          : construcción de vistas públicas y `doGet`
+- `105_PointSpread.gs`          : dispersión determinista de puntos coincidentes
+- `110_Export_uMap.gs`          : generación de GeoJSON para uMap
+- `120_Export_TV.gs`            : export específico para cliente TV
+- `130_Export_API.gs`           : endpoints JSON/manifest
+- `140_TV_YouTube_Metadata.gs`  : normalización y metadatos YouTube/TV
 
-La separación por archivos permite mantener el proyecto organizado según responsabilidades.
+Flujo básico de configuración y despliegue
+----------------------------------------
+1. Registrar la hoja maestra en la configuración (vincular la hoja principal al script).
+2. Crear/pegar cada `.gs` en el proyecto de Apps Script correspondiente.
+3. Evitar mantener simultáneamente el antiguo monolito y los módulos.
+4. Guardar y recargar Google Sheets.
+5. Ejecutar desde el menú: `Archipiélago Vivo > Instalar / actualizar activadores`.
+6. Autorizar permisos cuando Google lo solicite.
+7. Implementar (Deploy) como *Web App* si procede y dar acceso público de lectura; copiar la URL `/exec`.
+8. Comprobar y verificar los exports desde `Archipiélago Vivo > Exports · Ver URLs`.
 
-### Componentes previstos
+Endpoints y formatos de export
+-----------------------------
+- `?export=manifest`
+- `?export=umap&layer=<isla|canarias>` → GeoJSON `FeatureCollection`
+- `?export=tv` → JSON con `videos`, `entities` y `conflicts`
 
-| Archivo         | Función                                  |
-| --------------- | ---------------------------------------- |
-| `Code.gs`       | Punto de entrada y funciones principales |
-| `config.gs`     | Configuración del sistema                |
-| `data.gs`       | Lectura y tratamiento de datos           |
-| `validation.gs` | Validación de registros                  |
-| `utils.gs`      | Funciones auxiliares                     |
+Condiciones y precauciones
+--------------------------
+- Una entidad se publica si `consent_publication` = Sí, `status` = Activo y `verified` = Sí.
+- No exponer directamente hojas sensibles: `data`, `_consents`, `_gdpr`, `form_responses`.
+- `doGet` debe servir únicamente vistas derivadas generadas por `100_Publicacion.gs`.
+- `105_PointSpread.gs` solo altera coordenadas de presentación; no modifica datos originales.
 
-La estructura definitiva podrá modificarse cuando el código crezca.
+Ver más detalles y pasos de instalación en `apps-script/src/README.txt`.
 
 ---
 
@@ -188,7 +219,7 @@ Las imágenes de las entidades no se almacenan en este repositorio.
 Existe un repositorio independiente destinado a las imágenes:
 
 ```text
-ArchipielagoVivo/archipielagovivo-img
+ArchipielagoVivo/img
 ```
 
 La relación entre los datos y las imágenes se realiza mediante el **ID de la entidad**.
@@ -197,19 +228,19 @@ La estructura prevista para las imágenes es:
 
 ```text
 <ID>/
-└── profile.webp
+└── logo.webp
 ```
 
 Por ejemplo:
 
 ```text
 123456789/
-└── profile.webp
+└── logo.webp
 ```
 
 El sistema puede utilizar el ID de la entidad para construir la URL correspondiente.
 
-Si `profile.webp` no existe, el sistema podrá determinar que la entidad no dispone de una imagen de perfil válida.
+Si `logo.webp` no existe, el sistema podrá determinar que la entidad no dispone de una imagen de perfil válida.
 
 La especificación completa de este sistema se documentará en:
 

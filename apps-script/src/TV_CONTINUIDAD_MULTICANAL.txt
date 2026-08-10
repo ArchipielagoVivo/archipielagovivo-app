@@ -1,0 +1,62 @@
+ARCHIPIÉLAGO VIVO TV · SCHEMA V2 + CONTINUIDAD MULTICANAL
+
+Este paquete mantiene schema_version = 2 y amplía el JSON de TV de forma compatible.
+
+NOVEDADES
+=========
+1. _tv_channels incorpora:
+   - channel_number
+   - slug
+   - name
+   - description
+   - status
+
+2. El JSON ?export=tv incorpora:
+   - tv_config.default_channel_id
+   - tv_config.timezone = Atlantic/Canary
+   - tv_config.channel_switching
+   - presentation.program_change_teasers
+
+3. program_change_teasers define la continuidad:
+   - aparece 30 segundos antes de un CAMBIO DE PROGRAMA
+   - posición: margen derecho
+   - muestra thumbnail del primer vídeo del programa entrante
+   - canal, número de canal, nombre de programa y cuenta atrás
+   - se suprime durante entity_rotation, entity_new y entity_deadline
+
+4. Cada fila de schedule exporta:
+   - is_global
+   - is_global_entity_block
+
+IMPORTANTE
+==========
+El contador 30 -> 0 y la columna dinámica se implementan en el frontend.
+Apps Script solo exporta la configuración y los datos necesarios para resolverlo.
+
+No se crea una fila adicional en _tv_schedule para la continuidad.
+
+CANALES
+=======
+1 · Archipiélago Vivo TV
+2 · Fuerteventura
+3 · Territorio
+4 · Memoria y saberes
+
+La TV es multicanal virtual: cada canal tiene su timeline calculada a partir
+de schedule + programs + media. Los bloques entity_* son globales y sincronizan
+todos los canales.
+
+TABLAS
+======
+Usar los TSV incluidos como referencia:
+- _tv_channels_CORREGIDO.tsv
+- _tv_programs_CORREGIDO.tsv
+- _tv_schedule_CORREGIDO.tsv
+
+El program_id correcto es:
+archipielago-vivo
+
+No:
+archipielago_vivo
+
+El programa "alternativas" debe existir porque está usado por GEN-011.

@@ -42,7 +42,9 @@ const AV_TV_MEDIA_REQUIRED_HEADERS_ = [
   'rights_status',
   'source',
   'status',
-  'metadata_updated_at'
+  'metadata_updated_at',
+  'embeddable',
+  'privacy_status'
 ];
 
 
@@ -816,6 +818,12 @@ function upsertEntityTvMediaRow_(
     youtube_license:
       metadata.youtube_license,
 
+    embeddable:
+      metadata.embeddable === true,
+
+    privacy_status:
+      metadata.privacy_status,
+
     type:
       'entity',
 
@@ -958,6 +966,12 @@ function updateTvMediaMetadataColumns_(
 
     youtube_license:
       metadata.youtube_license,
+
+    embeddable:
+      metadata.embeddable === true,
+
+    privacy_status:
+      metadata.privacy_status,
 
     metadata_updated_at:
       new Date()

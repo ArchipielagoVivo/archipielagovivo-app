@@ -59,6 +59,57 @@ const CONFIG = {
   TV_DEFAULT_CHANNEL_ID:
     'general',
 
+  TV_TIMEZONE:
+    'Atlantic/Canary',
+
+  TV_CHANNEL_SWITCHING:
+    true,
+
+  // Presentación / continuidad de canales.
+  TV_PROGRAM_CHANGE_TEASERS: {
+    enabled: true,
+    lead_seconds: 30,
+    position: 'right',
+    show_thumbnail: true,
+    show_channel_number: true,
+    show_channel_name: true,
+    show_program_name: true,
+    show_countdown: true,
+    suppress_during_global_entity_blocks: true
+  },
+
+  // Política de Archipiélago Vivo TV.
+  TV_NEW_ENTITY_HOURS:
+    72,
+
+  TV_ALLOWED_EXTERNAL_RIGHTS_STATUSES: [
+    'embed_only',
+    'authorized'
+  ],
+
+  TV_SELECTION_RULES: [
+    'program_rotation',
+    'entity_rotation',
+    'entity_new',
+    'entity_deadline'
+  ],
+
+  /*
+   * El plazo de vuelta completa crece según la duración total
+   * de todos los vídeos de tipo entity que sean reproducibles.
+   */
+  TV_ENTITY_ROTATION_TIERS: [
+    { max_minutes: 10, full_cycle_hours: 2 },
+    { max_minutes: 20, full_cycle_hours: 6 },
+    { max_minutes: 40, full_cycle_hours: 12 },
+    { max_minutes: 80, full_cycle_hours: 24 },
+    { max_minutes: 160, full_cycle_hours: 48 },
+    { max_minutes: 240, full_cycle_hours: 72 },
+    { max_minutes: 480, full_cycle_hours: 168 },
+    { max_minutes: 960, full_cycle_hours: 336 },
+    { max_minutes: null, full_cycle_hours: 720 }
+  ],
+
   EXPORT_LAYERS: [
     'el-hierro',
     'la-gomera',

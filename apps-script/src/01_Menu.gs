@@ -53,6 +53,10 @@ function onOpen() {
       'TV · Actualizar metadatos de catálogo',
       'refreshTvMediaYouTubeMetadata'
     )
+    .addItem(
+      'TV · Validar configuración',
+      'validateTvConfiguration'
+    )
     .addSeparator()
     .addItem(
       'ADMIN · Registrar hoja maestra para Web App',
