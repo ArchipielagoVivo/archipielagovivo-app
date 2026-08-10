@@ -52,3 +52,82 @@ Notas técnicas
 - No se usan import/export.
 - 00_Config.gs concentra CONFIG y CONSENT_DEFINITIONS.
 - La lógica está separada por responsabilidad, no por orden de ejecución.
+
+
+EXPORTS PÚBLICOS
+================
+100_Publicacion.gs
+110_Export_uMap.gs
+120_Export_TV.gs
+130_Export_API.gs
+
+La publicación es una vista derivada de data.
+
+Una entidad entra en exports solamente si:
+- consent_publication = Sí
+- status = Activo
+- verified = Sí
+
+Los campos marcados *_private nunca se exportan.
+Si location_private = true, no se exporta la ubicación original:
+se usa la localización general "Canarias" de _locations y la capa canarias.
+
+Endpoints de la Web App
+=======================
+?export=manifest
+?export=umap&layer=el-hierro
+?export=umap&layer=la-gomera
+?export=umap&layer=la-palma
+?export=umap&layer=tenerife
+?export=umap&layer=gran-canaria
+?export=umap&layer=fuerteventura
+?export=umap&layer=lanzarote
+?export=umap&layer=la-graciosa
+?export=umap&layer=canarias
+?export=tv
+
+uMap recibe GeoJSON FeatureCollection.
+TV recibe JSON con:
+- videos[VIDEO_ID] -> entidad
+- entities[ENTITY_ID] -> ficha pública
+- conflicts -> vídeos asignados a más de una entidad
+
+Para publicar los endpoints:
+1. Implementar > Nueva implementación.
+2. Tipo: Aplicación web.
+3. Ejecutar como propietario del script.
+4. Dar acceso público de lectura a la Web App.
+5. Copiar la URL /exec.
+6. En la hoja:
+   Archipiélago Vivo > Exports · Ver URLs
+
+IMPORTANTE
+==========
+No expongas directamente data, _consents, _gdpr ni form_responses.
+doGet solo entrega vistas construidas por 100_Publicacion.gs.
+
+
+DISPERSIÓN DE PUNTOS COINCIDENTES
+=================================
+105_PointSpread.gs
+
+Cuando varias fichas comparten exactamente la misma coordenada representativa,
+el export les aplica una pequeña variación visual determinista.
+
+No se modifica:
+- data
+- _locations
+- la ubicación real/original
+
+Solo cambian las coordenadas entregadas a uMap.
+
+Radios máximos actuales:
+- municipio: 350 m
+- isla: 3 km
+- Canarias: 15 km
+
+Solo se dispersan grupos con 2 o más puntos coincidentes.
+El desplazamiento depende de entity_id, así que permanece estable entre exports.
+
+Los radios se pueden cambiar en:
+CONFIG.POINT_SPREAD_METERS

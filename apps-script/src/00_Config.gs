@@ -29,7 +29,42 @@ const CONFIG = {
   ID_LENGTH: 8,
 
   CONSENT_ID_PREFIX: 'CONS-',
-  GDPR_ID_PREFIX: 'GDPR-'
+  GDPR_ID_PREFIX: 'GDPR-',
+
+  // Publicación / exports.
+  PUBLIC_STATUS: 'Activo',
+  PUBLIC_REQUIRE_VERIFIED: true,
+
+  UMAP_MAP_BASE_URL:
+    'https://umap.openstreetmap.fr/es/map/archipielago-vivo_1422295',
+
+  TV_PLAYLIST_ID:
+    'PLHnCLhOECJFA',
+
+  EXPORT_LAYERS: [
+    'el-hierro',
+    'la-gomera',
+    'la-palma',
+    'tenerife',
+    'gran-canaria',
+    'fuerteventura',
+    'lanzarote',
+    'la-graciosa',
+    'canarias'
+  ],
+
+  /*
+   * Dispersión VISUAL de puntos coincidentes.
+   * Solo afecta al export público; nunca modifica data.
+   *
+   * Los valores son radios máximos alrededor del punto
+   * representativo almacenado en _locations.
+   */
+  POINT_SPREAD_METERS: {
+    municipality: 350,
+    island: 3000,
+    canarias: 15000
+  }
 };
 
 

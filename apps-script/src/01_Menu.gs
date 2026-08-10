@@ -32,6 +32,15 @@ function onOpen() {
       'GDPR · Ejecutar supresión aprobada',
       'executeSelectedGdprErasure'
     )
+    .addSeparator()
+    .addItem(
+      'Exports · Validar datos públicos',
+      'validatePublicExports'
+    )
+    .addItem(
+      'Exports · Ver URLs',
+      'showExportUrls'
+    )
     .addToUi();
 }
 
