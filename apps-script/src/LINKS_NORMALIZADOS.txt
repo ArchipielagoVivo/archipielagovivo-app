@@ -1,0 +1,48 @@
+LINKS NORMALIZADOS
+
+El problema estaba en buildPublicLinksMarkdown():
+
+antes:
+@archplgvivo
+→ [[@archplgvivo|Instagram]]
+
+ahora:
+@archplgvivo
+→ [[https://www.instagram.com/archplgvivo/|Instagram]]
+
+Se convierten automáticamente:
+- web
+- Instagram
+- Facebook
+- Bluesky
+- GitHub
+- Telegram
+- Threads
+- TikTok
+- WhatsApp
+- X
+- YouTube
+
+LinkedIn:
+para no confundir perfiles personales y páginas, usar URL completa o:
+- in/usuario
+- company/entidad
+- school/entidad
+- showcase/entidad
+
+Mastodon:
+usar URL completa o @usuario@instancia.
+Ejemplo:
+@archplgvivo@mastodon.art
+
+Pixelfed:
+usar preferentemente URL completa o @usuario@instancia.
+
+DATA conserva el valor original.
+Solo el campo público calculado `links` convierte los valores en URLs.
+
+Después de instalar:
+1. guardar Apps Script;
+2. actualizar la implementación del Web App;
+3. comprobar ?export=umap&layer=canarias;
+4. en uMap usar {links}.

@@ -1,0 +1,35 @@
+CORRECCIÓN · buildFormConsentSourceReference is not defined
+
+CAUSA
+=====
+El reprocesador llamaba a buildFormConsentSourceReference(), pero esa función
+no estaba disponible en el proyecto que se estaba ejecutando.
+
+SOLUCIÓN
+========
+Se añade un helper central y con nombre único:
+
+65_SourceReferences.gs
+avBuildFormConsentSourceReference_()
+
+Y se actualizan:
+- 10_Formulario.gs
+- 15_Reprocesar.gs
+- 70_FormSync.gs
+
+Así quedan cubiertos:
+- nuevas respuestas del formulario
+- edición/sincronización del formulario
+- reprocesado completo
+
+QUÉ HACER AHORA
+===============
+1. Sustituir/añadir los archivos del patch.
+2. Guardar Apps Script.
+3. Recargar la hoja.
+4. Ejecutar de nuevo:
+   ADMIN · Reprocesar fuentes → data + _consents
+
+El intento fallido pudo haber vaciado DATA y _consents antes de encontrar
+el error. No pasa nada: form_responses y _manual no se borraron, y el nuevo
+reprocesado los reconstruirá.

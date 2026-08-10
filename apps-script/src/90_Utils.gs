@@ -117,13 +117,124 @@ function rowToObject(
  */
 
 
+const AV_SPREADSHEET_ID_PROPERTY_ =
+  'ARCHIPIELAGO_VIVO_SPREADSHEET_ID';
+
+
+function rememberActiveProjectSpreadsheet_() {
+
+  let spreadsheet = null;
+
+
+  try {
+
+    spreadsheet =
+      SpreadsheetApp
+        .getActiveSpreadsheet();
+
+
+  } catch (error) {
+
+    spreadsheet =
+      null;
+  }
+
+
+  if (!spreadsheet) {
+
+    return null;
+  }
+
+
+  PropertiesService
+    .getScriptProperties()
+    .setProperty(
+      AV_SPREADSHEET_ID_PROPERTY_,
+      spreadsheet.getId()
+    );
+
+
+  return spreadsheet;
+}
+
+
+function registerProjectSpreadsheetForWebApp() {
+
+  const spreadsheet =
+    rememberActiveProjectSpreadsheet_();
+
+
+  if (!spreadsheet) {
+
+    throw new Error(
+      'No hay una hoja de cálculo activa.'
+    );
+  }
+
+
+  SpreadsheetApp
+    .getUi()
+    .alert(
+      'Hoja maestra registrada para el Web App.\n\n' +
+      spreadsheet.getName()
+    );
+
+
+  return spreadsheet.getId();
+}
+
+
+function getProjectSpreadsheet() {
+
+  /*
+   * Menús/triggers: usar y recordar la hoja activa.
+   */
+
+  const active =
+    rememberActiveProjectSpreadsheet_();
+
+
+  if (active) {
+
+    return active;
+  }
+
+
+  /*
+   * Web App: abrir explícitamente la hoja maestra.
+   */
+
+  const spreadsheetId =
+    PropertiesService
+      .getScriptProperties()
+      .getProperty(
+        AV_SPREADSHEET_ID_PROPERTY_
+      );
+
+
+  if (!spreadsheetId) {
+
+    throw new Error(
+      'No está registrada la hoja maestra para el Web App. ' +
+      'Ejecuta desde la hoja: ' +
+      'Archipiélago Vivo → ADMIN · Registrar hoja maestra para Web App.'
+    );
+  }
+
+
+  return SpreadsheetApp
+    .openById(
+      spreadsheetId
+    );
+}
+
+
 function getSheet(
   name
 ) {
 
   const sheet =
-    SpreadsheetApp
-      .getActiveSpreadsheet()
+    getProjectSpreadsheet()
       .getSheetByName(
         name
       );

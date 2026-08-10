@@ -1,0 +1,14 @@
+CONSENT_YOUTUBE · TEXTO EXACTO DEL FORMULARIO
+
+Descripción mostrada:
+Si el vídeo no está alojado en YouTube, ¿nos autorizas a subir una copia al canal de Archipiélago Vivo?
+Declaro que tengo los derechos o las autorizaciones necesarias para permitir este uso del vídeo.
+La autorización se limita a su utilización dentro de Archipiélago Vivo y sus herramientas de difusión.
+Podrás retirar esta autorización posteriormente contactando con Archipiélago Vivo.
+
+Respuesta afirmativa:
+Sí, autorizo la publicación del vídeo en el canal de YouTube de Archipiélago Vivo en modo no listado,
+con la finalidad de incorporarlo a Archipiélago Vivo TV y vincularlo a esta ficha.
+
+El consentimiento guardado en _consents conserva ambos elementos en consent_text:
+la información mostrada al usuario y la formulación exacta de la respuesta afirmativa.

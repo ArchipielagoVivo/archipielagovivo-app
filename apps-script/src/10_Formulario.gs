@@ -99,11 +99,11 @@ function onFormSubmit(e) {
 
 
     const locations =
-      loadLocations();
+      avLoadLocations_();
 
 
     const location =
-      resolveLocation(
+      avResolveLocation_(
         response.location,
         locations
       );
@@ -178,13 +178,16 @@ function onFormSubmit(e) {
         {
           source: 'form',
           sourceReference:
-            buildFormConsentSourceReference(
+            avBuildFormConsentSourceReference_(
               entityId,
               responseRow,
               'new'
             ),
           recordedBy: 'automatic',
-          partial: false
+          partial: false,
+          eventDate:
+            response.timestamp ||
+            new Date()
         }
       );
 
@@ -247,13 +250,15 @@ function onFormSubmit(e) {
       {
         source: 'form',
         sourceReference:
-          buildFormConsentSourceReference(
+          avBuildFormConsentSourceReference_(
             response.entity_id,
             responseRow,
             'update'
           ),
         recordedBy: 'automatic',
-        partial: false
+        partial: false,
+          eventDate:
+            new Date()
       }
     );
 
@@ -479,6 +484,9 @@ function normaliseFormResponse(
     linkedin:
       get('linkedin'),
 
+    github:
+      get('github'),
+
     mastodon:
       get('mastodon'),
 
@@ -526,6 +534,9 @@ function normaliseFormResponse(
 
     consent_newsletter:
       get('consent_newsletter'),
+
+    consent_youtube:
+      get('consent_youtube'),
 
     re_consent_publication:
       get('re_consent_publication')

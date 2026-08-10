@@ -159,7 +159,7 @@ function syncEditedFormResponses() {
 
 
     const locations =
-      loadLocations();
+      avLoadLocations_();
 
 
     const lastRow =
@@ -249,7 +249,7 @@ function syncEditedFormResponses() {
 
 
         const location =
-          resolveLocation(
+          avResolveLocation_(
             response.location,
             locations
           );
@@ -269,7 +269,7 @@ function syncEditedFormResponses() {
           {
             source: 'form',
             sourceReference:
-              buildFormConsentSourceReference(
+              avBuildFormConsentSourceReference_(
                 entityId,
                 rowNumber,
                 'edit'
@@ -476,7 +476,7 @@ function getFormHashPropertyKey(
 }
 
 
-function buildFormConsentSourceReference(
+function avBuildFormConsentSourceReference_(
   entityId,
   rowNumber,
   action

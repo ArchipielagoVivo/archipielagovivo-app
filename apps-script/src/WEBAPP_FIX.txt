@@ -1,0 +1,32 @@
+CORRECCIÓN WEB APP · HOJA MAESTRA
+
+El Web App ya no depende de SpreadsheetApp.getActiveSpreadsheet()
+para localizar DATA.
+
+Nuevo comportamiento:
+- desde la hoja/menús: recuerda automáticamente el ID de la hoja maestra;
+- desde el Web App: abre esa hoja explícitamente con SpreadsheetApp.openById().
+
+PASOS
+=====
+1. Sustituir:
+   - 01_Menu.gs
+   - 90_Utils.gs
+   - 130_Export_API.gs
+
+2. Guardar Apps Script.
+3. Recargar la hoja.
+4. Ejecutar:
+   Archipiélago Vivo
+   → ADMIN · Registrar hoja maestra para Web App
+
+5. Actualizar la implementación del Web App a una nueva versión.
+6. Abrir ?export=manifest
+
+El manifest incorpora ahora:
+source_entities
+
+Interpretación:
+- source_entities = 0 → el Web App no está leyendo las filas de DATA.
+- source_entities = 1 y public_entities = 0 → DATA sí se lee y el problema está en un filtro de publicación.
+- source_entities = 1 y public_entities = 1 → listo para conectar uMap.

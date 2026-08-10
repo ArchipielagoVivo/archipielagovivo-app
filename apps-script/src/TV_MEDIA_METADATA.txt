@@ -1,0 +1,100 @@
+TV · SINCRONIZACIÓN DE VÍDEOS Y METADATOS YOUTUBE
+
+OBJETIVO
+========
+_tv_media pasa a ser el catálogo técnico persistente de Archipiélago Vivo TV.
+
+Los vídeos asociados a fichas continúan teniendo su FUENTE DE VERDAD en DATA.
+La fila de _tv_media es derivada y sirve para conservar metadatos necesarios
+para programación lineal, especialmente duration_seconds.
+
+MENÚ NUEVO
+==========
+TV · Sincronizar vídeos de fichas
+- toma únicamente los vídeos de fichas públicas;
+- respeta el detector de conflictos existente;
+- crea/actualiza una fila por vídeo en _tv_media;
+- consulta YouTube y guarda metadatos.
+
+TV · Actualizar metadatos de catálogo
+- recorre cualquier fila de _tv_media con youtube_id;
+- sirve también para documentales y otros contenidos añadidos manualmente;
+- no altera campos curatoriales.
+
+REQUISITO
+=========
+En Apps Script:
+Servicios (+)
+→ YouTube Data API v3
+→ Añadir
+
+COLUMNAS ESPERADAS EN _tv_media
+===============================
+media_id
+youtube_id
+title
+description
+tv_description
+channel_title
+thumbnail
+published_at
+duration_seconds
+youtube_tags
+youtube_license
+type
+program_id
+tags
+channels
+rights_status
+source
+status
+metadata_updated_at
+
+VÍDEOS DE FICHAS
+================
+media_id:
+ENT-<ENTITY_ID>-<YOUTUBE_ID>
+
+type:
+entity
+
+program_id por defecto:
+archipielago-vivo
+
+channels por defecto:
+general
+
+source:
+data:<ENTITY_ID>
+
+CAMPOS OBTENIDOS DE YOUTUBE
+===========================
+title
+description
+channel_title
+thumbnail
+published_at
+duration_seconds
+youtube_tags
+youtube_license
+metadata_updated_at
+
+CAMPOS CURATORIALES QUE NO SE SOBREESCRIBEN
+============================================
+tv_description
+tags
+channels
+rights_status
+
+Además, si program_id/status ya tienen valor se conservan.
+
+DURACIÓN
+========
+YouTube devuelve duration en ISO 8601.
+El script la convierte a duration_seconds, que será la base para calcular
+qué vídeo corresponde a cada instante de la parrilla.
+
+NOTA
+====
+El script detecta si un vídeo no es embebible y lo informa al terminar,
+pero no modifica automáticamente rights_status ni toma decisiones legales.

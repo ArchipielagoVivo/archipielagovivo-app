@@ -1,0 +1,45 @@
+REPROCESADO COMPLETO · FORM + MANUAL
+
+La reconstrucción usa ahora las DOS fuentes operativas:
+
+1. form_responses
+2. _manual
+
+ORDEN
+=====
+Primero se reconstruyen todas las respuestas del formulario.
+Después se reaplican, por orden de fila, todas las operaciones de _manual
+que ya estén marcadas como procesadas.
+
+Esto permite:
+- alta desde Form -> data
+- alta desde _manual -> data
+- actualización manual de una ficha del Form
+- actualización posterior de una ficha creada manualmente
+- clear_fields
+- cambios de privacidad
+- cambios de consentimiento
+
+NO SE REPROCESAN
+================
+- filas _manual pendientes
+- filas _manual con ERROR
+
+Así el reprocesado reproduce el estado que ya había sido efectivamente aplicado,
+sin convertir trabajos pendientes en cambios reales.
+
+FECHAS
+======
+Para las operaciones manuales se intenta conservar:
+1. date_revised
+2. processed_at
+3. date_created
+4. fecha actual como último recurso
+
+CONSENTIMIENTOS
+===============
+_consents se reconstruye desde ambos orígenes:
+- source=form
+- source=manual
+
+El estado actual en data continúa siendo TRUE/FALSE.

@@ -31,6 +31,7 @@ const PUBLIC_ATOMIC_FIELDS = [
   'facebook',
   'bsky',
   'linkedin',
+  'github',
   'mastodon',
   'pixelfed',
   'telegram',
@@ -48,6 +49,7 @@ const PUBLIC_SOCIAL_LINKS = [
   ['facebook', '📘', 'Facebook'],
   ['bsky', '🦋', 'Bluesky'],
   ['linkedin', '💼', 'LinkedIn'],
+  ['github', '💻', 'GitHub'],
   ['mastodon', '🐘', 'Mastodon'],
   ['pixelfed', '🖼️', 'Pixelfed'],
   ['telegram', '✈️', 'Telegram'],
@@ -467,7 +469,7 @@ function buildPublicLocation(
 function findCanariasLocation() {
 
   const locations =
-    loadLocations();
+    avLoadLocations_();
 
 
   const location =
@@ -590,14 +592,35 @@ function buildPublicLinksMarkdown(
         const label =
           definition[2];
 
-        const value =
+        const rawValue =
           String(
             properties[field] || ''
           )
             .trim();
 
 
-        if (!value) {
+        if (!rawValue) {
+
+          return;
+        }
+
+
+        const link =
+          buildPublicProfileUrl(
+            field,
+            rawValue
+          );
+
+
+        /*
+         * En plataformas federadas (Mastodon/Pixelfed), un
+         * simple @usuario no identifica el servidor.
+         *
+         * Si no podemos construir una URL fiable, no fabricamos
+         * una URL incorrecta.
+         */
+
+        if (!link) {
 
           return;
         }
@@ -606,7 +629,7 @@ function buildPublicLinksMarkdown(
         lines.push(
           icon +
           ' [[' +
-          value +
+          link +
           '|' +
           label +
           ']]'
@@ -617,6 +640,377 @@ function buildPublicLinksMarkdown(
 
   return lines.join(
     '\n'
+  );
+}
+
+
+function buildPublicProfileUrl(
+  field,
+  rawValue
+) {
+
+  const value =
+    String(
+      rawValue || ''
+    )
+      .trim();
+
+
+  if (!value) {
+
+    return '';
+  }
+
+
+  /*
+   * Si ya recibimos una URL, se conserva.
+   */
+
+  if (
+    /^https?:\/\//i.test(
+      value
+    )
+  ) {
+
+    return value;
+  }
+
+
+  if (
+    /^www\./i.test(
+      value
+    )
+  ) {
+
+    return (
+      'https://' +
+      value
+    );
+  }
+
+
+  const cleanHandle =
+    value
+      .replace(
+        /^@+/,
+        ''
+      )
+      .trim();
+
+
+  switch (field) {
+
+    case 'url':
+
+      /*
+       * Para una web escrita sin protocolo:
+       * archipielagovivo.org → https://archipielagovivo.org
+       */
+
+      return (
+        'https://' +
+        value.replace(
+          /^\/+/,
+          ''
+        )
+      );
+
+
+    case 'instagram':
+
+      return (
+        'https://www.instagram.com/' +
+        encodeURIComponent(
+          cleanHandle
+        ) +
+        '/'
+      );
+
+
+    case 'facebook':
+
+      return (
+        'https://www.facebook.com/' +
+        cleanHandle.replace(
+          /^\/+/,
+          ''
+        )
+      );
+
+
+    case 'bsky':
+
+      return (
+        'https://bsky.app/profile/' +
+        encodeURIComponent(
+          cleanHandle
+        )
+      );
+
+
+    case 'github':
+
+      return (
+        'https://github.com/' +
+        encodeURIComponent(
+          cleanHandle
+        )
+      );
+
+
+    case 'telegram':
+
+      return (
+        'https://t.me/' +
+        encodeURIComponent(
+          cleanHandle
+        )
+      );
+
+
+    case 'threads':
+
+      return (
+        'https://www.threads.net/@' +
+        encodeURIComponent(
+          cleanHandle
+        )
+      );
+
+
+    case 'tiktok':
+
+      return (
+        'https://www.tiktok.com/@' +
+        encodeURIComponent(
+          cleanHandle
+        )
+      );
+
+
+    case 'x':
+
+      return (
+        'https://x.com/' +
+        encodeURIComponent(
+          cleanHandle
+        )
+      );
+
+
+    case 'youtube':
+
+      /*
+       * @Canal → youtube.com/@Canal
+       *
+       * Los canales que ya llegan como URL se resolvieron arriba.
+       */
+
+      return (
+        'https://www.youtube.com/@' +
+        encodeURIComponent(
+          cleanHandle
+        )
+      );
+
+
+    case 'whatsapp':
+
+      /*
+       * Admite:
+       * +34600111222
+       * 34600111222
+       *
+       * Si el formulario recibe una URL wa.me completa, se
+       * conserva en el bloque de URL superior.
+       */
+
+      const phone =
+        value.replace(
+          /\D/g,
+          ''
+        );
+
+
+      return phone
+        ? 'https://wa.me/' +
+          phone
+        : '';
+
+
+    case 'linkedin':
+
+      return buildLinkedInUrl(
+        value
+      );
+
+
+    case 'mastodon':
+
+      return buildMastodonUrl(
+        value
+      );
+
+
+    case 'pixelfed':
+
+      return buildPixelfedUrl(
+        value
+      );
+  }
+
+
+  return '';
+}
+
+
+function buildLinkedInUrl(
+  value
+) {
+
+  const clean =
+    String(
+      value || ''
+    )
+      .trim()
+      .replace(
+        /^https?:\/\/(www\.)?linkedin\.com\//i,
+        ''
+      )
+      .replace(
+        /^\/+/,
+        ''
+      );
+
+
+  if (!clean) {
+
+    return '';
+  }
+
+
+  /*
+   * Como LinkedIn diferencia personas, empresas, escuelas, etc.,
+   * no inventamos "in/" o "company/" si solo se facilita un
+   * nombre de usuario ambiguo.
+   *
+   * Valores recomendados:
+   * in/usuario
+   * company/entidad
+   * school/entidad
+   * showcase/entidad
+   * o la URL completa.
+   */
+
+  if (
+    /^(in|company|school|showcase)\//i.test(
+      clean
+    )
+  ) {
+
+    return (
+      'https://www.linkedin.com/' +
+      clean
+    );
+  }
+
+
+  return '';
+}
+
+
+function buildMastodonUrl(
+  value
+) {
+
+  const clean =
+    String(
+      value || ''
+    )
+      .trim()
+      .replace(
+        /^@/,
+        ''
+      );
+
+
+  const parts =
+    clean.split(
+      '@'
+    );
+
+
+  if (
+    parts.length !== 2 ||
+    !parts[0] ||
+    !parts[1]
+  ) {
+
+    /*
+     * @usuario no basta: necesitamos también la instancia.
+     * Ej.: @usuario@mastodon.art
+     */
+
+    return '';
+  }
+
+
+  return (
+    'https://' +
+    parts[1] +
+    '/@' +
+    encodeURIComponent(
+      parts[0]
+    )
+  );
+}
+
+
+function buildPixelfedUrl(
+  value
+) {
+
+  const clean =
+    String(
+      value || ''
+    )
+      .trim()
+      .replace(
+        /^@/,
+        ''
+      );
+
+
+  const parts =
+    clean.split(
+      '@'
+    );
+
+
+  if (
+    parts.length !== 2 ||
+    !parts[0] ||
+    !parts[1]
+  ) {
+
+    /*
+     * Igual que Mastodon: sin instancia no existe una URL
+     * inequívoca.
+     *
+     * Lo más seguro es guardar la URL completa del perfil.
+     */
+
+    return '';
+  }
+
+
+  return (
+    'https://' +
+    parts[1] +
+    '/' +
+    encodeURIComponent(
+      parts[0]
+    )
   );
 }
 

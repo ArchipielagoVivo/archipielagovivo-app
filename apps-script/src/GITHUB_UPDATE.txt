@@ -1,0 +1,23 @@
+GITHUB · ACTUALIZACIÓN
+
+Archivos modificados:
+- 10_Formulario.gs
+- 20_Data.gs
+- 30_Manual.gs
+- 100_Publicacion.gs
+
+Comportamiento:
+- Google Form lee `github`.
+- data guarda `github` y `github_private`.
+- _manual lee y actualiza `github`.
+- private_fields reconoce exactamente la etiqueta `GitHub`.
+- el export público incluye GitHub solo si no está marcado privado.
+- `{links}` de uMap genera automáticamente una línea GitHub cuando exista.
+
+No requieren cambios por GitHub:
+- 60_Consentimientos.gs
+- 70_FormSync.gs (hereda github a través de normaliseFormResponse)
+- 80_GDPR.gs (exporta los campos de data de forma genérica)
+- 110_Export_uMap.gs
+- 120_Export_TV.gs
+- 130_Export_API.gs

@@ -41,6 +41,24 @@ const CONFIG = {
   TV_PLAYLIST_ID:
     'PLHnCLhOECJFA',
 
+  TV_MEDIA_SHEET:
+    '_tv_media',
+
+  TV_PROGRAMS_SHEET:
+    '_tv_programs',
+
+  TV_CHANNELS_SHEET:
+    '_tv_channels',
+
+  TV_SCHEDULE_SHEET:
+    '_tv_schedule',
+
+  TV_ENTITY_PROGRAM_ID:
+    'archipielago-vivo',
+
+  TV_DEFAULT_CHANNEL_ID:
+    'general',
+
   EXPORT_LAYERS: [
     'el-hierro',
     'la-gomera',
@@ -105,6 +123,18 @@ const CONSENT_DEFINITIONS = {
       '¿Quieres recibir el correo de Archipiélago Vivo cada dos semanas?\n' +
       'Te enviaremos un correo aproximadamente cada dos semanas con historias, novedades, propuestas ' +
       'y otras formas de participar en Archipiélago Vivo. Puedes darte de baja cuando quieras.'
+  },
+
+  youtube: {
+    field: 'consent_youtube',
+    purpose: 'youtube',
+    text:
+      'Si el vídeo no está alojado en YouTube, ¿nos autorizas a subir una copia al canal de Archipiélago Vivo?\n' +
+      'Declaro que tengo los derechos o las autorizaciones necesarias para permitir este uso del vídeo. ' +
+      'La autorización se limita a su utilización dentro de Archipiélago Vivo y sus herramientas de difusión. ' +
+      'Podrás retirar esta autorización posteriormente contactando con Archipiélago Vivo.\n' +
+      'Respuesta afirmativa: Sí, autorizo la publicación del vídeo en el canal de YouTube de Archipiélago Vivo ' +
+      'en modo no listado, con la finalidad de incorporarlo a Archipiélago Vivo TV y vincularlo a esta ficha.'
   }
 };
 

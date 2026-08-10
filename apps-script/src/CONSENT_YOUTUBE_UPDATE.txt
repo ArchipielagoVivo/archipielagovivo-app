@@ -1,0 +1,46 @@
+CONSENT_YOUTUBE · ACTUALIZACIÓN
+
+Campo añadido en las fuentes:
+- form_responses.consent_youtube
+- _manual.consent_youtube
+- data.consent_youtube
+
+COMPORTAMIENTO
+==============
+DATA:
+consent_youtube se guarda siempre como booleano real TRUE/FALSE.
+
+_CONSENTS:
+se registra automáticamente mediante CONSENT_DEFINITIONS con:
+purpose = youtube
+status = granted / denied / withdrawn
+consent_text = texto configurado en 00_Config.gs
+consent_version = CONFIG.CONSENT_VERSION
+
+FORM SYNC:
+no requiere código específico adicional.
+Al estar consent_youtube incluido en normaliseFormResponse(), el hash detecta
+cambios en la respuesta y recordConsentChanges() registra el cambio.
+
+REPROCESADO:
+no requiere código específico adicional.
+15_Reprocesar.gs procesa de forma genérica los campos devueltos por
+normaliseFormResponse() y normaliseManualResponse(), y _consents recorre
+CONSENT_DEFINITIONS.
+
+GDPR:
+no requiere cambio específico:
+- data se exporta de forma genérica;
+- _consents se exporta por entity_id.
+
+TV:
+consent_youtube NO bloquea vídeos que ya estén alojados en YouTube.
+Su finalidad es autorizar a Archipiélago Vivo a subir una copia cuando el
+vídeo original no está en YouTube. Hasta que exista un ID/URL de YouTube,
+120_Export_TV.gs simplemente no podrá asociar ese vídeo a la TV.
+
+IMPORTANTE
+==========
+El texto de CONSENT_DEFINITIONS.youtube.text debe coincidir con el texto
+real mostrado en el formulario. Si has usado una redacción distinta,
+actualiza ese texto antes de registrar nuevos consentimientos.

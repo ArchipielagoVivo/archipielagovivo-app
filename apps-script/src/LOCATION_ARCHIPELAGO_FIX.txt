@@ -1,0 +1,28 @@
+CORRECCIÓN DE LOCALIZACIÓN · CANARIAS
+
+La fila `Canarias` de _locations es de tipo `archipelago`:
+
+_location_label = Canarias
+_archipelago    = Canarias
+_islands        = vacío
+_municipalities = vacío
+_lon / _lat     = coordenadas generales
+
+El código anterior copiaba únicamente `_islands` a `data.island`.
+Por eso lon/lat sí llegaban a DATA, pero island quedaba vacío.
+
+Ahora:
+- type=archipelago  → data.island = _archipelago
+- type=island       → data.island = _islands
+- type=municipality → data.island = _islands y data.municipality = _municipalities
+
+Resultado para location=Canarias:
+island       = Canarias
+municipality = vacío
+lon          = -15.7368719
+lat          = 28.64781921
+
+Después de instalar:
+Archipiélago Vivo → ADMIN · Reprocesar fuentes → data + _consents
+
+No hace falta reenviar el formulario.
