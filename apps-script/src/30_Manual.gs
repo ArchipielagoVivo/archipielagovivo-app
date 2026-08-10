@@ -239,8 +239,24 @@ function processManualRow(
 
 
   /*
-   * Resolver localización.
+   * Obtener entity_id antes de resolver la localización.
+   *
+   * Regla de _manual:
+   * campo vacío = NO CAMBIAR.
+   *
+   * Por tanto, una actualización de una entidad existente NO debe
+   * exigir `location`. Si el campo queda vacío, se conserva la
+   * localización que ya existe en data (incluida la reconstruida
+   * previamente desde form_responses).
+   *
+   * Solo resolvemos _locations cuando _manual aporta una ubicación
+   * nueva. Las altas nacidas exclusivamente en _manual sí necesitan
+   * una ubicación.
    */
+
+  let entityId =
+    manual.entity_id;
+
 
   console.log(
     'LOCATION MANUAL: "' +
@@ -249,23 +265,22 @@ function processManualRow(
   );
 
 
-  const locations =
-    avLoadLocations_();
+  let location =
+    null;
 
 
-  const location =
-    avResolveLocation_(
-      manual.location,
-      locations
-    );
+  if (manual.location) {
+
+    const locations =
+      avLoadLocations_();
 
 
-  /*
-   * Obtener entity_id.
-   */
-
-  let entityId =
-    manual.entity_id;
+    location =
+      avResolveLocation_(
+        manual.location,
+        locations
+      );
+  }
 
 
   /*
@@ -273,6 +288,15 @@ function processManualRow(
    */
 
   if (!entityId) {
+
+    if (!location) {
+
+      throw new Error(
+        'Alta manual nueva sin ubicación. ' +
+        'Indica location en _manual.'
+      );
+    }
+
 
     entityId =
       generateUniqueEntityId(

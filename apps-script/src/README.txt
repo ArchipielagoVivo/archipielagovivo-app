@@ -1,90 +1,133 @@
 ARCHIPIÉLAGO VIVO · APPS SCRIPT MODULAR
 
-Visión general
---------------
-Colección modular de scripts de Google Apps Script que operan sobre la
-hoja de cálculo principal del proyecto Archipiélago Vivo. Implementa
-ingesta (forms), gestión de consentimientos/GDPR, exportación pública
-y funcionalidades de publicación para mapas y TV.
+Archivos
+========
+00_Config.gs
+01_Menu.gs
+10_Formulario.gs
+20_Data.gs
+30_Manual.gs
+40_Privacidad.gs
+50_Localizaciones.gs
+60_Consentimientos.gs
+70_FormSync.gs
+80_GDPR.gs
+90_Utils.gs
 
-Estructura principal (apps-script/src)
--------------------------------------
-Archivos destacados (.gs):
-- 00_Config.gs            : configuración global y constantes
-- 01_Menu.gs              : menú del proyecto en la hoja
-- 05_Admin_Reset.gs       : utilidades/acciones administrativas (reset)
-- 10_Formulario.gs        : manejo de respuestas de formularios
-- 15_Reprocesar.gs        : rutinas de re-procesado y reindexado
-- 20_Data.gs              : transformación y ensamblado de `data`
-- 30_Manual.gs            : herramientas manuales de mantenimiento
-- 40_Privacidad.gs        : lógica relacionada con privacidad y export
-- 45_Data_Consent_Booleans.gs : correcciones/normalizaciones de booleans
-- 50_Localizaciones.gs    : tablas y helpers de localización
-- 60_Consentimientos.gs   : definición y gestión de consentimientos
-- 65_SourceReferences.gs  : gestión de referencias y fuentes
-- 70_FormSync.gs          : sincronización de ediciones del formulario
-- 80_GDPR.gs              : endpoints y helpers GDPR
-- 90_Utils.gs             : utilidades generales
+Nombres estandarizados
+======================
+Hoja de consentimientos: _consents
+Hoja GDPR: _gdpr
+Columna ID GDPR: request_id
 
-Exports y publicación
-----------------------
-Archivos de export/ publicación:
-- 100_Publicacion.gs         : construye vistas públicas y doGet
-- 105_PointSpread.gs         : dispersión determinista de puntos coincidentes
-- 110_Export_uMap.gs         : capa GeoJSON para uMap
-- 120_Export_TV.gs           : export específico para cliente TV
-- 130_Export_API.gs          : endpoints JSON/manifest
-- 140_TV_YouTube_Metadata.gs : metadatos y normalización YouTube/TV
+Instalación
+===========
+1. Abre el MISMO proyecto Apps Script vinculado a la hoja.
+2. Crea un archivo de secuencia de comandos por cada .gs del paquete.
+3. Copia el contenido de cada archivo.
+4. Después elimina o vacía el antiguo archivo monolítico.
+   IMPORTANTE: no dejes monolito + módulos simultáneamente porque duplicarías
+   CONFIG, funciones y otros símbolos globales.
+5. Guarda el proyecto.
+6. Recarga Google Sheets.
+7. Ejecuta una vez:
+   Archipiélago Vivo > Instalar / actualizar activadores
+8. Autoriza permisos si Google los solicita.
 
-Datos y ficheros auxiliares
----------------------------
-TSV de entrada (local):
-- _tv_channels_CORREGIDO.tsv
-- _tv_programs_CORREGIDO.tsv
-- _tv_schedule_CORREGIDO.tsv
+Prueba mínima
+=============
+1. Alta ficticia desde Google Forms.
+2. Comprobar form_responses.
+3. Comprobar data.
+4. Comprobar _consents.
+5. Editar la respuesta desde el enlace de Google Forms.
+6. Ejecutar "Sincronizar ediciones del formulario".
+7. Probar una solicitud access en _gdpr.
+8. Probar erasure SOLO con una entidad ficticia y status = approved.
 
-Documentación y notas en texto:
-- BOOLEANOS_REPROCESADO.txt, CONSENT_YOUTUBE_TEXT.txt, GITHUB_UPDATE.txt, etc.
+Notas técnicas
+==============
+- Todos los .gs forman un único proyecto.
+- Apps Script carga los archivos del servidor en un espacio global común.
+- No se usan import/export.
+- 00_Config.gs concentra CONFIG y CONSENT_DEFINITIONS.
+- La lógica está separada por responsabilidad, no por orden de ejecución.
 
-Instalación y despliegue
-------------------------
-1. Abrir el mismo proyecto de Apps Script vinculado a la hoja.
-2. Registrar la hoja maestra en la configuración (vincular la hoja principal al script).
-3. Crear un archivo `.gs` por cada módulo listado y pegar su contenido.
-4. Evitar mantener simultáneamente el antiguo monolito y los módulos.
-5. Guardar y recargar Google Sheets.
-6. Ejecutar una vez desde el menú: Archipiélago Vivo > Instalar / actualizar activadores
-7. Autorizar permisos si Google los solicita.
 
-Endpoints principales (doGet)
-----------------------------
-Parámetros habituales:
-- `?export=manifest`
-- `?export=umap&layer=<isla|canarias>`
-- `?export=tv`
+EXPORTS PÚBLICOS
+================
+100_Publicacion.gs
+110_Export_uMap.gs
+120_Export_TV.gs
+130_Export_API.gs
 
-Formato de salida:
-- uMap: GeoJSON FeatureCollection
-- TV: JSON con `videos`, `entities` y `conflicts`
+La publicación es una vista derivada de data.
 
-Condiciones de publicación
---------------------------
-Una entidad se publica si:
-- `consent_publication` = Sí
-- `status` = Activo
-- `verified` = Sí
+Una entidad entra en exports solamente si:
+- consent_publication = Sí
+- status = Activo
+- verified = Sí
 
-Campos marcados `*_private` no se exportan. Si `location_private = true`
-se reemplaza la ubicación por la localización general definida en `_locations`.
+Los campos marcados *_private nunca se exportan.
+Si location_private = true, no se exporta la ubicación original:
+se usa la localización general "Canarias" de _locations y la capa canarias.
 
-Notas importantes
------------------
-- No exponer directamente hojas sensibles: `data`, `_consents`, `_gdpr`, `form_responses`.
-- `doGet` debe servir únicamente vistas derivadas (desde `100_Publicacion.gs`).
-- `105_PointSpread.gs` solo altera coordenadas de presentación, no los datos
-  originales ni `_locations`.
+Endpoints de la Web App
+=======================
+?export=manifest
+?export=umap&layer=el-hierro
+?export=umap&layer=la-gomera
+?export=umap&layer=la-palma
+?export=umap&layer=tenerife
+?export=umap&layer=gran-canaria
+?export=umap&layer=fuerteventura
+?export=umap&layer=lanzarote
+?export=umap&layer=la-graciosa
+?export=umap&layer=canarias
+?export=tv
 
-Dónde mirar
------------
-Revisar los archivos listados en este directorio para entender flujos
-concretos (reprocesado, export TV, normalización de YouTube, etc.).
+uMap recibe GeoJSON FeatureCollection.
+TV recibe JSON con:
+- videos[VIDEO_ID] -> entidad
+- entities[ENTITY_ID] -> ficha pública
+- conflicts -> vídeos asignados a más de una entidad
+
+Para publicar los endpoints:
+1. Implementar > Nueva implementación.
+2. Tipo: Aplicación web.
+3. Ejecutar como propietario del script.
+4. Dar acceso público de lectura a la Web App.
+5. Copiar la URL /exec.
+6. En la hoja:
+   Archipiélago Vivo > Exports · Ver URLs
+
+IMPORTANTE
+==========
+No expongas directamente data, _consents, _gdpr ni form_responses.
+doGet solo entrega vistas construidas por 100_Publicacion.gs.
+
+
+DISPERSIÓN DE PUNTOS COINCIDENTES
+=================================
+105_PointSpread.gs
+
+Cuando varias fichas comparten exactamente la misma coordenada representativa,
+el export les aplica una pequeña variación visual determinista.
+
+No se modifica:
+- data
+- _locations
+- la ubicación real/original
+
+Solo cambian las coordenadas entregadas a uMap.
+
+Radios máximos actuales:
+- municipio: 350 m
+- isla: 3 km
+- Canarias: 15 km
+
+Solo se dispersan grupos con 2 o más puntos coincidentes.
+El desplazamiento depende de entity_id, así que permanece estable entre exports.
+
+Los radios se pueden cambiar en:
+CONFIG.POINT_SPREAD_METERS
