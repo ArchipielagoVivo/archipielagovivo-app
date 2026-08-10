@@ -1,0 +1,27 @@
+CORRECCIÓN · CONSENTIMIENTOS EN DATA
+
+Los cinco campos consent_* de DATA deben ser booleanos reales:
+TRUE / FALSE
+
+Nunca deben guardar textos como:
+"Sí, autorizo la publicación"
+"Sí, confirmo"
+"Sí, quiero recibir el correo"
+
+Esta corrección añade una garantía independiente:
+
+45_Data_Consent_Booleans.gs
+
+Menú:
+- ADMIN · Normalizar consentimientos DATA
+- ADMIN · Diagnóstico tipos consentimientos
+
+Además, el reprocesado ejecuta automáticamente la normalización al terminar.
+
+IMPORTANTE:
+Si después de instalar ESTE paquete y ejecutar
+"ADMIN · Normalizar consentimientos DATA"
+siguen apareciendo textos, revisa el proyecto de Apps Script por si conserva
+un antiguo archivo monolítico/legado con funciones duplicadas. Los nombres
+internos de este módulo son únicos precisamente para evitar esa interferencia
+en la normalización manual.
